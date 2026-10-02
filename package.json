@@ -12,9 +12,11 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.1145.0",
     "@aws-sdk/client-sqs": "^3.699.0",
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-scroll-area": "^1.2.18",
+    "@radix-ui/react-select": "^2.3.7",
     "@radix-ui/react-separator": "^1.1.15",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.23",

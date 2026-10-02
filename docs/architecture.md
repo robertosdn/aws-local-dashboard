@@ -8,18 +8,79 @@ The initial resource workflow focuses on Amazon SQS. Users can inspect queues an
 
 ## Application layers
 
+```mermaid
+graph TB
+    subgraph Frontend
+        Router[React Router<br/>Routing & Shell]
+        UI[Tailwind + shadcn/ui<br/>User Interface]
+        Config[Settings Context<br/>Endpoint & Region]
+        
+        subgraph SharedServices[Shared AWS Services]
+            BaseClient[createSqsClient()<br/>Factory Pattern]
+            ApiLayer[Resource API<br/>(list, CRUD ops)]
+            Hooks[React Query Hooks<br/>(useQueues, etc.)]
+        end
+        
+        subgraph SQSFeature[SQS Feature]
+            SQSApi[features/sqs/api/sqs.ts]
+            SQSHooks[features/sqs/hooks/]
+            SQSComponents[features/sqs/components/]
+            SQSPage[QueuesPage]
+        end
+        
+        subgraph LambdaFeature[Lambda Feature]
+            LambdaApi[features/lambda/api/lambda.ts]
+            LambdaHooks[features/lambda/hooks/]
+            LambdaComponents[features/lambda/components/]
+            LambdaPage[LambdaPage]
+        end
+    end
+
+    Router --> UI
+    UI --> Config
+    Config --> BaseClient
+    BaseClient --> ApiLayer
+    ApiLayer --> Hooks
+    Hooks --> SQSComponents
+    Hooks --> LambdaComponents
+    SQSComponents --> SQSPage
+    LambdaComponents --> LambdaPage
+    SQSApi -.->|reuses| BaseClient
+    LambdaApi -.->|reuses| BaseClient
+    SQSHooks -.->|pattern| LambdaHooks
+    SQSComponents -.->|patterns| LambdaComponents
+    BaseClient --> Endpoint[(AWS-compatible<br/>Endpoint)]
+```
+
 - **Routing and application shell:** React Router organizes the dashboard routes and shared page layout.
 - **User interface:** Tailwind CSS provides utility-based styling, and shadcn/ui-inspired primitives are used to build reusable interface components without depending on a one-off generated component command.
-- **AWS access:** Client-side service code uses an AWS-compatible client to send requests from the browser to the configured endpoint. Resource operations belong in this layer rather than in view components.
-- **Configuration:** The endpoint and any non-secret connection settings are provided to the client-side application. The endpoint is not hard-coded to a production AWS account; for local use it points to the local emulator.
+- **Shared AWS Services:** Reusable layer containing:
+  - **Base Client Factory** (`src/services/aws.ts`): `createSqsClient()` pattern - extensible for Lambda, S3, DynamoDB
+  - **API Layer Pattern** (`features/*/api/`): Consistent create-client → call → destroy pattern
+  - **React Query Hooks Pattern** (`features/*/hooks/`): Standardized query keys, stale time, invalidation
+- **SQS Feature:** Implements the patterns for queue operations
+- **Lambda Feature:** Reuses base client factory, API pattern, hooks pattern, and component patterns from SQS
+- **Configuration:** Settings context provides shared endpoint/region to all services
 
 ## Request flow
 
-1. The user opens the dashboard and provides or selects the AWS-compatible endpoint.
-2. The application configures its browser-side AWS service client with that endpoint and the required region and credentials for the selected environment.
-3. A route or UI action requests an operation, such as listing SQS queues or sending a message.
-4. The client sends the request directly from the browser to the configured endpoint.
-5. The response is rendered in the dashboard, and request failures are surfaced to the user.
+```mermaid
+sequenceDiagram
+    participant User
+    participant Dashboard
+    participant Browser
+    participant Endpoint
+
+    User->>Dashboard: Opens dashboard
+    User->>Dashboard: Provides/selects AWS endpoint
+    Dashboard->>Browser: Configures AWS client
+    User->>Dashboard: Requests operation (list queues, send message)
+    Dashboard->>Browser: Sends request
+    Browser->>Endpoint: Direct request (CORS)
+    Endpoint-->>Browser: Response
+    Browser-->>Dashboard: Response data
+    Dashboard-->>User: Renders response / surfaces errors
+```
 
 There is no application server between the browser and the AWS-compatible service. Consequently, the service endpoint must be reachable from the browser, and the service must permit the browser's cross-origin requests (CORS) where applicable.
 
