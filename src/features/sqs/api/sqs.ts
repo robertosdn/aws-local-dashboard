@@ -7,7 +7,7 @@ import {
   type QueueAttributeName,
 } from '@aws-sdk/client-sqs';
 
-import { createSqsClient } from '@/services/aws';
+import { createSqsClient, type AwsClientConfig } from '@/services/aws';
 import type { SQSQueue, SQSMessage, PurgeQueueResult } from '../types/sqs';
 
 const QUEUE_ATTRIBUTES: QueueAttributeName[] = [
@@ -41,62 +41,75 @@ async function getQueueAttributes(client: SQSClient, queueUrl: string): Promise<
   };
 }
 
-export async function listQueues(): Promise<SQSQueue[]> {
-  const client = createSqsClient();
+export async function listQueues(config?: AwsClientConfig): Promise<SQSQueue[]> {
+  const client = createSqsClient(config);
 
-  const listCommand = new ListQueuesCommand({});
-  const listResponse = await client.send(listCommand);
+  try {
+    const listCommand = new ListQueuesCommand({});
+    const listResponse = await client.send(listCommand);
 
-  const queueUrls = listResponse.QueueUrls || [];
+    const queueUrls = listResponse.QueueUrls || [];
 
-  const queues: SQSQueue[] = await Promise.all(
-    queueUrls.map(async (queueUrl) => {
-      const attributes = await getQueueAttributes(client, queueUrl);
-      return {
-        url: queueUrl,
-        name: extractQueueName(queueUrl),
-        attributes,
-      };
-    })
-  );
+    const queues: SQSQueue[] = await Promise.all(
+      queueUrls.map(async (queueUrl) => {
+        const attributes = await getQueueAttributes(client, queueUrl);
+        return {
+          url: queueUrl,
+          name: extractQueueName(queueUrl),
+          attributes,
+        };
+      })
+    );
 
-  return queues;
+    return queues;
+  } finally {
+    client.destroy();
+  }
 }
 
 export async function receiveMessages(
   queueUrl: string,
-  maxMessages = 10
+  maxMessages = 10,
+  config?: AwsClientConfig,
 ): Promise<SQSMessage[]> {
-  const client = createSqsClient();
+  const client = createSqsClient(config);
 
-  const command = new ReceiveMessageCommand({
-    QueueUrl: queueUrl,
-    MaxNumberOfMessages: maxMessages,
-    WaitTimeSeconds: 0,
-    AttributeNames: ['All'] as QueueAttributeName[],
-    MessageAttributeNames: MESSAGE_ATTRIBUTES,
-    VisibilityTimeout: 0,
-  });
+  try {
+    const command = new ReceiveMessageCommand({
+      QueueUrl: queueUrl,
+      MaxNumberOfMessages: maxMessages,
+      WaitTimeSeconds: 0,
+      AttributeNames: ['All'] as QueueAttributeName[],
+      MessageAttributeNames: MESSAGE_ATTRIBUTES,
+      VisibilityTimeout: 0,
+    });
 
-  const response = await client.send(command);
-  const messages = response.Messages || [];
+    const response = await client.send(command);
+    const messages = response.Messages || [];
 
-  return messages.map((msg): SQSMessage => ({
-    messageId: msg.MessageId || '',
-    receiptHandle: msg.ReceiptHandle || '',
-    body: msg.Body || '',
-    attributes: msg.Attributes || {},
-    messageAttributes: msg.MessageAttributes as SQSMessage['messageAttributes'],
-  }));
+    return messages.map((msg): SQSMessage => ({
+      messageId: msg.MessageId || '',
+      receiptHandle: msg.ReceiptHandle || '',
+      body: msg.Body || '',
+      attributes: msg.Attributes || {},
+      messageAttributes: msg.MessageAttributes as SQSMessage['messageAttributes'],
+    }));
+  } finally {
+    client.destroy();
+  }
 }
 
-export async function purgeQueue(queueUrl: string): Promise<PurgeQueueResult> {
-  const client = createSqsClient();
+export async function purgeQueue(queueUrl: string, config?: AwsClientConfig): Promise<PurgeQueueResult> {
+  const client = createSqsClient(config);
 
-  const command = new PurgeQueueCommand({
-    QueueUrl: queueUrl,
-  });
+  try {
+    const command = new PurgeQueueCommand({
+      QueueUrl: queueUrl,
+    });
 
-  await client.send(command);
-  return { success: true };
+    await client.send(command);
+    return { success: true };
+  } finally {
+    client.destroy();
+  }
 }

@@ -1,7 +1,9 @@
 import { useEndpointStatus } from '@/lib/useEndpointStatus';
+import { useSettings } from '@/features/settings/hooks/useSettings';
 
 export default function DashboardPage() {
-  const { isOnline, isChecking } = useEndpointStatus();
+  const { endpoint, settings } = useSettings();
+  const { isOnline, isChecking } = useEndpointStatus(endpoint);
   const statusText = isChecking ? 'Checking...' : isOnline ? 'ONLINE' : 'OFFLINE';
   const statusTone = isChecking
     ? 'text-amber-400'
@@ -22,11 +24,11 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
           <p className="text-sm text-slate-400">Endpoint</p>
-          <p className="mt-2 text-lg font-medium text-white">http://localhost:4566</p>
+          <p className="mt-2 break-all text-lg font-medium text-white">{endpoint}</p>
         </div>
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
           <p className="text-sm text-slate-400">Region</p>
-          <p className="mt-2 text-lg font-medium text-white">us-east-1</p>
+          <p className="mt-2 text-lg font-medium text-white">{settings.region}</p>
         </div>
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
           <p className="text-sm text-slate-400">Status</p>

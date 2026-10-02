@@ -7,9 +7,11 @@ import { Separator } from '@/components/ui/separator';
 import { navigation } from '@/config/navigation';
 import { cn } from '@/lib/utils';
 import { useEndpointStatus } from '@/lib/useEndpointStatus';
+import { useSettings } from '@/features/settings/hooks/useSettings';
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const { isOnline, isChecking } = useEndpointStatus();
+  const { endpoint, settings } = useSettings();
+  const { isOnline, isChecking } = useEndpointStatus(endpoint);
   const statusLabel = isChecking ? 'Checking...' : isOnline ? 'ONLINE' : 'OFFLINE';
   const statusTone = isChecking
     ? 'border-amber-500/30 bg-amber-500/10 text-amber-300'
@@ -62,7 +64,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                 {statusLabel}
               </span>
             </div>
-            <p className="mt-2 text-sm font-medium text-slate-50">http://localhost:4566</p>
+            <p className="mt-2 break-all text-sm font-medium text-slate-50">{endpoint}</p>
           </div>
         </div>
 
@@ -94,7 +96,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-slate-400">
               Local context
             </p>
-            <p className="mt-2 text-sm text-slate-200">Region: us-east-1</p>
+            <p className="mt-2 text-sm text-slate-200">Region: {settings.region}</p>
             <p className="mt-1 text-sm text-slate-200">Mode: emulator</p>
           </div>
         </ScrollArea>

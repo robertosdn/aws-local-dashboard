@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { navigation } from '@/config/navigation';
 import { cn } from '@/lib/utils';
 import { useEndpointStatus } from '@/lib/useEndpointStatus';
+import { useSettings } from '@/features/settings/hooks/useSettings';
 
 export function Header({ onOpenSidebar }: { onOpenSidebar: () => void }) {
   const location = useLocation();
   const currentItem = navigation.find((item) => item.path === location.pathname) ?? navigation[0];
-  const { isOnline, isChecking } = useEndpointStatus();
+  const { endpoint } = useSettings();
+  const { isOnline, isChecking } = useEndpointStatus(endpoint);
   const statusLabel = isChecking ? 'Checking...' : isOnline ? 'ONLINE' : 'OFFLINE';
   const statusTone = isChecking
     ? 'border-amber-500/30 bg-amber-500/10 text-amber-300'
