@@ -1,0 +1,57 @@
+# Tasks: Base Dashboard Layout
+
+## Phase 1: Navigation Configuration
+- [x] Create `src/config/navigation.ts` with navigation items and icons
+- [x] Import lucide-react icons
+
+## Phase 2: Layout Components
+- [x] Create `src/components/layout/Layout.tsx` (shell with Outlet)
+- [x] Create `src/components/layout/Sidebar.tsx` (navigation + active state)
+- [x] Create `src/components/layout/Header.tsx` (page title + mobile toggle)
+- [x] Create `src/components/layout/index.ts` (barrel export)
+
+## Phase 3: Styling & Responsive
+- [x] Add Tailwind CSS variables for sidebar width, header height
+- [x] Implement desktop sidebar (fixed, always visible)
+- [x] Implement mobile drawer (slide-in, overlay backdrop)
+- [x] Add sidebar toggle button in Header (mobile)
+- [x] Add smooth transitions for drawer open/close
+
+## Phase 4: Routing Integration
+- [x] Update `src/routes.ts` to use Layout as wrapper
+- [x] Create page placeholder components:
+  - `src/pages/DashboardPage.tsx`
+  - `src/pages/QueuesPage.tsx`
+  - `src/pages/SettingsPage.tsx`
+- [x] Update `src/App.tsx` to use router
+
+## Phase 5: shadcn/ui Integration
+- [x] Use shadcn/ui `Button` for toggle
+- [x] Use shadcn/ui `Separator` in sidebar
+- [x] Use shadcn/ui `ScrollArea` for navigation list
+- [x] Apply shadcn/ui color tokens (sidebar, background, border, etc.)
+
+## Phase 6: Active Route Highlighting
+- [x] Use `NavLink` with `isActive` or `className` function
+- [x] Style active item with shadcn/ui primary/accent colors
+- [x] Ensure keyboard focus styles visible
+
+## Phase 6.1: Live Endpoint Status Badge
+- [x] Implement a connection check against the local MinStack endpoint
+- [x] Show the badge text as uppercase `ONLINE` when the endpoint is reachable
+- [x] Show the badge text as uppercase `OFFLINE` when the endpoint is unreachable
+- [x] Apply green styling to the online state and red styling to the offline state
+- [x] Ensure the status refreshes automatically while the dashboard remains open
+
+## Phase 7: Verification
+- [x] Run `npm run dev` - verify layout renders
+- [x] Test navigation between all three routes
+- [x] Verify active state highlighting works
+- [x] Verify the endpoint badge shows `ONLINE` in green and `OFFLINE` in red
+- [x] Test responsive behavior:
+  - Desktop: sidebar always visible
+  - Mobile: hamburger menu opens drawer
+  - Tablet: collapsible sidebar
+- [x] Run `npm run lint` - verify no errors
+- [x] Run `npm run typecheck` - verify no TypeScript errors
+- [x] Run `npm run build` - verify production build succeeds
