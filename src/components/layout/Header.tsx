@@ -45,9 +45,6 @@ export function Header({ onOpenSidebar }: { onOpenSidebar: () => void }) {
             <span className={cn('h-2.5 w-2.5 rounded-full', isOnline ? 'bg-emerald-400' : isChecking ? 'bg-amber-400' : 'bg-red-400')} />
             {statusLabel}
           </div>
-          <Button type="button" variant="secondary" size="sm">
-            Local Stack
-          </Button>
         </div>
       </div>
     </header>
