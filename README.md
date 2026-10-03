@@ -87,6 +87,9 @@ src/
 
 ## Scripts
 
+The `scripts/` directory contains Node.js helpers that use the AWS CLI to
+provision and exercise local AWS test resources.
+
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start development server |
@@ -114,6 +117,20 @@ Override the endpoint or resource names with the `AWS_ENDPOINT`, `QUEUE_NAME`,
 and `FUNCTION_NAME` environment variables; set `LAMBDA_ROLE_ARN` if your
 emulator requires a different role ARN. `AWS_REGION` can also be set to choose
 the region (defaults to `us-east-1`).
+
+### Send a test message to the SQS queue
+
+After creating the local test queue, run:
+
+```bash
+node scripts/send-sqs-test-message.mjs
+```
+
+By default, the helper sends a sample JSON message to
+`dashboard-lambda-events` at `http://localhost:4566`, using dummy credentials.
+Pass a message body as the first argument, or set `MESSAGE_BODY`. Set
+`QUEUE_NAME`, `AWS_ENDPOINT`, and `AWS_REGION` to target another local test
+queue or endpoint.
 
 ## Security
 

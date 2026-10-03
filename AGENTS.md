@@ -39,9 +39,17 @@ reuse an existing number or group a new feature into an earlier directory.
 When implementing tasks from `tasks.md`, mark completed tasks with `[X]` prefix (e.g., `- [X] Task description`). This provides visibility into progress.
 
 ## Local Development
+
 - Run `ministackorg/ministack` Docker container on port `4566`
 - Configure dashboard to use `http://localhost:4566`
 - React dev server serves frontend; container emulates AWS APIs separately
+
+## Test Resource Helpers
+
+- The `scripts/` directory contains Node.js helpers that use the AWS CLI to create and exercise local AWS test resources.
+- `scripts/create-sqs-lambda.mjs` creates the example SQS queue, Lambda function, and event source mapping.
+- `scripts/send-sqs-test-message.mjs` sends a test message to that queue. Keep its default queue name aligned with the provisioning helper; both can be configured with `QUEUE_NAME`.
+- These helpers target the local emulator by default and use dummy credentials. Do not use them with real AWS credentials or endpoints.
 
 ## Security Constraints
 - **Never** bundle permanent AWS credentials in frontend source, build-time env vars, or browser storage
