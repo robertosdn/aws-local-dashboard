@@ -23,7 +23,7 @@ A client-side AWS resource dashboard for local development. Connects directly to
 
 - React 18 + TypeScript + Vite
 - React Router for navigation
-- Tailwind CSS + shadcn/ui-inspired components (Radix UI)
+- Project-owned UI components styled with Tailwind CSS; shadcn/ui is used as a pattern reference and Radix UI provides selected accessible primitives
 - TanStack React Query for data fetching
 - AWS SDK v3 (@aws-sdk/client-sqs)
 
@@ -95,6 +95,25 @@ src/
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run TypeScript compiler check |
 | `npm run format` | Format with Prettier |
+
+### Create a local SQS-to-Lambda example
+
+With ministack or LocalStack running on `http://localhost:4566`, Node.js,
+project dependencies installed with `npm install`, and AWS CLI installed, run:
+
+```bash
+node scripts/create-sqs-lambda.mjs
+```
+
+The script creates the `dashboard-lambda-events` queue, the
+`dashboard-sqs-consumer` Node.js Lambda function, and an SQS event source
+mapping between them using AWS CLI commands. The Lambda code is packaged from
+[`scripts/lambda-test.mjs`](scripts/lambda-test.mjs). The script uses dummy
+credentials (`test`/`test`) and does not use credentials from your AWS profile.
+Override the endpoint or resource names with the `AWS_ENDPOINT`, `QUEUE_NAME`,
+and `FUNCTION_NAME` environment variables; set `LAMBDA_ROLE_ARN` if your
+emulator requires a different role ARN. `AWS_REGION` can also be set to choose
+the region (defaults to `us-east-1`).
 
 ## Security
 

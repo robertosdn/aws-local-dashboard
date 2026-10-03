@@ -25,15 +25,15 @@
   - `src/pages/SettingsPage.tsx`
 - [x] Update `src/App.tsx` to use router
 
-## Phase 5: shadcn/ui Integration
-- [x] Use shadcn/ui `Button` for toggle
-- [x] Use shadcn/ui `Separator` in sidebar
-- [x] Use shadcn/ui `ScrollArea` for navigation list
-- [x] Apply shadcn/ui color tokens (sidebar, background, border, etc.)
+## Phase 5: Project UI Components
+- [x] Use the project-owned `Button` for the sidebar toggle
+- [x] Use the project-owned `Separator` in the sidebar
+- [x] Use the project-owned `ScrollArea` for the navigation list
+- [x] Apply project design tokens for sidebar, background, borders, and related UI
 
 ## Phase 6: Active Route Highlighting
 - [x] Use `NavLink` with `isActive` or `className` function
-- [x] Style active item with shadcn/ui primary/accent colors
+- [x] Style active item with project primary/accent colors
 - [x] Ensure keyboard focus styles visible
 
 ## Phase 6.1: Live Endpoint Status Badge

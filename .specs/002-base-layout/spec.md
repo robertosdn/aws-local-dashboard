@@ -75,11 +75,9 @@ Use `lucide-react` icons (already in deps):
 - **Main**: `flex-1 overflow-auto bg-background`
 - **Header**: `sticky top-0 z-10 h-16 border-b bg-background/95 backdrop-blur`
 
-### shadcn/ui Components Used
-- `Sidebar` (from shadcn/ui sidebar component if available, else custom)
-- `Button` (for mobile toggle)
-- `Separator` (between nav sections)
-- `ScrollArea` (for long navigation lists)
+### UI Components
+- Build the layout with project-owned components and existing Radix UI primitives where appropriate.
+- Consult shadcn/ui as a reference for sidebar, button, separator, and scroll-area patterns; do not download or generate these components from shadcn/ui.
 
 ## Responsive Breakpoints
 - **Desktop (≥1024px)**: Sidebar always visible
@@ -100,7 +98,7 @@ src/
 │   │   ├── Sidebar.tsx
 │   │   ├── Header.tsx
 │   │   └── index.ts
-│   └── ui/              # shadcn/ui components
+│   └── ui/              # Project-owned reusable UI components
 ├── config/
 │   └── navigation.ts
 ├── routes.ts            # Updated with layout wrapper

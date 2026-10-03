@@ -235,7 +235,7 @@ class SQSService {
 - Validation errors: Show inline in forms
 
 ## Styling
-- Use existing Tailwind + shadcn/ui-inspired components
+- Use existing project-owned UI components and Tailwind styles; consult shadcn/ui only as a pattern and accessibility reference
 - Tables: responsive, horizontal scroll on mobile
 - State badges: green (Enabled/Active), yellow (Enabling/Disabling), red (Disabled/Failed), gray (Deleted)
 - JSON editor: dark theme, line numbers, format button

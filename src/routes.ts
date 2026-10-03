@@ -4,6 +4,7 @@ import QueuesPage from '@/pages/QueuesPage';
 import SettingsPage from '@/pages/SettingsPage';
 import S3Page from '@/pages/S3Page';
 import LambdaPage from '@/pages/LambdaPage';
+import LambdaDetailPage from '@/pages/LambdaDetailPage';
 import DynamoDbPage from '@/pages/DynamoDbPage';
 
 export type AppRoute = {
@@ -32,6 +33,11 @@ export const routes: AppRoute[] = [
     path: '/lambda',
     label: 'Lambda',
     element: createElement(LambdaPage),
+  },
+  {
+    path: '/lambda/:functionName',
+    label: 'Lambda Detail',
+    element: createElement(LambdaDetailPage),
   },
   {
     path: '/dynamodb',

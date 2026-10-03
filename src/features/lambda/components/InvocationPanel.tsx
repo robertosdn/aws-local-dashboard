@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Play, Copy, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Copy, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { LambdaFunction } from '../types/lambda';
 import { useInvokeFunction } from '../hooks/useInvokeFunction';
@@ -72,9 +72,6 @@ export function InvocationPanel({ function: fn, open, onOpenChange }: Invocation
               <p className="text-sm font-medium text-cyan-400">Invoke Function</p>
               <h3 className="text-lg font-semibold text-white">{fn.functionName}</h3>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
-              <X className="h-4 w-4" />
-            </Button>
           </DialogTitle>
         </DialogHeader>
 

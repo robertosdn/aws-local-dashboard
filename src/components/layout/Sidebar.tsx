@@ -70,7 +70,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
         <ScrollArea className="flex-1 px-3 py-4">
           <div className="space-y-2">
-            {navigation.map(({ path, label, icon: Icon }) => (
+            {navigation.map(({ path, label, icon: Icon, comingSoon }) => (
               <NavLink
                 key={path}
                 to={path}
@@ -86,6 +86,11 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
               >
                 <Icon className="h-4 w-4" />
                 <span>{label}</span>
+                {comingSoon && (
+                  <span className="ml-auto rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-300">
+                    Coming soon
+                  </span>
+                )}
               </NavLink>
             ))}
           </div>
