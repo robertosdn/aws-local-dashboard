@@ -4,7 +4,7 @@
 
 - [X] Initialize React + TypeScript + Vite project
 - [X] Install dependencies: react-router-dom, @aws-sdk/client-sqs, @tanstack/react-query, lucide-react, clsx, tailwind-merge
-- [X] Configure Tailwind CSS with shadcn/ui-inspired design system
+- [X] Configure Tailwind CSS with project design tokens, using common UI patterns as reference
 - [X] Create `src/features/sqs/types/sqs.ts` with Queue/Message interfaces
 - [X] Set up environment variables (VITE_AWS_ENDPOINT, VITE_AWS_REGION)
 

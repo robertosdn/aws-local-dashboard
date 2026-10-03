@@ -2,9 +2,70 @@
 
 ## Overview
 
-This project is a client-side AWS resource dashboard built with React. It has no application backend: the browser sends requests directly to an AWS endpoint supplied by the user. The endpoint can be an AWS-compatible local service, such as the `ministackorg/ministack` container running on `localhost:4566`, or an appropriately configured AWS endpoint.
+This project is a client-side AWS resource dashboard built with React, TypeScript, Vite, and React Router. It has no application backend: the browser sends requests directly to an AWS endpoint supplied by the user. The endpoint can be an AWS-compatible local service, such as the `ministackorg/ministack` container running on `localhost:4566`, or an appropriately configured AWS endpoint.
 
-The initial resource workflow focuses on Amazon SQS. Users can inspect queues and perform supported queue operations from the dashboard. The application is intended to make local development and testing possible without deploying an application server.
+The dashboard currently supports Amazon SQS queue inspection and operations, and AWS Lambda function inspection and invocation. The application is intended to make local development and testing possible without deploying an application server.
+
+## Application Structure
+
+```text
+src/
+├── components/
+│   ├── layout/
+│   └── ui/
+├── features/
+│   ├── lambda/
+│   ├── settings/
+│   └── sqs/
+├── lib/
+├── pages/
+├── services/
+├── App.tsx
+└── routes.ts
+```
+
+## Responsibilities
+
+### `App.tsx`, `routes.ts`, and `pages/`
+
+React Router defines the routes, `Layout` provides the shared application shell, and page components compose feature workflows.
+
+### `components/ui/`
+
+Project-owned, reusable UI primitives with project-specific styling. Components
+are implemented and maintained in this repository; shadcn/ui is a design and
+accessibility reference, not a runtime dependency or a source of generated
+components that must be installed.
+
+### `features/`
+
+Feature-specific APIs, UI, hooks, types, settings context, and orchestration. Keep resource-specific behavior inside its feature.
+
+### `lib/`
+
+Generic helpers such as class-name utilities and endpoint status checks.
+
+### `services/`
+
+AWS SDK client factories shared by the features. There is no application backend; feature APIs call these clients from the browser.
+
+## Feature Boundaries
+
+Feature-specific code should remain inside its feature when possible.
+
+Example:
+
+```text
+src/features/customers/
+├── components/
+├── hooks/
+├── services/
+├── types/
+└── utils/
+```
+
+Shared code should only be promoted to `components/ui`, `lib`, or another
+shared layer when there is a genuine reuse requirement.
 
 ## Application layers
 
@@ -12,7 +73,7 @@ The initial resource workflow focuses on Amazon SQS. Users can inspect queues an
 graph TB
     subgraph Frontend
         Router[React Router<br/>Routing & Shell]
-        UI[Tailwind + shadcn/ui<br/>User Interface]
+        UI[Tailwind + Project UI Components<br/>shadcn/ui as reference]
         Config[Settings Context<br/>Endpoint & Region]
         
         subgraph SharedServices[Shared AWS Services]
@@ -53,14 +114,24 @@ graph TB
 ```
 
 - **Routing and application shell:** React Router organizes the dashboard routes and shared page layout.
-- **User interface:** Tailwind CSS provides utility-based styling, and shadcn/ui-inspired primitives are used to build reusable interface components without depending on a one-off generated component command.
+- **User interface:** Tailwind CSS styles project-owned reusable components. shadcn/ui is consulted as a reference for common patterns and accessibility.
 - **Shared AWS Services:** Reusable layer containing:
-  - **Base Client Factory** (`src/services/aws.ts`): `createSqsClient()` pattern - extensible for Lambda, S3, DynamoDB
+  - **AWS Client Factories** (`src/services/aws.ts`): `createSqsClient()` and `createLambdaClient()`, configured from shared endpoint and region settings
   - **API Layer Pattern** (`features/*/api/`): Consistent create-client → call → destroy pattern
   - **React Query Hooks Pattern** (`features/*/hooks/`): Standardized query keys, stale time, invalidation
 - **SQS Feature:** Implements the patterns for queue operations
 - **Lambda Feature:** Reuses base client factory, API pattern, hooks pattern, and component patterns from SQS
 - **Configuration:** Settings context provides shared endpoint/region to all services
+
+## UI Architecture
+
+- This React Router/Vite application owns its UI primitives in `src/components/ui/`; shadcn/ui is a reference for common patterns and accessibility, not a component package or required code generator.
+- Before creating a reusable primitive or common interface pattern, first check `src/components/ui/` and reuse or extend an appropriate project component.
+- Consult the official [shadcn/ui component catalog](https://ui.shadcn.com/docs/components) as a reference for established patterns, composition, and accessibility considerations.
+- Do not install or generate shadcn/ui components as the default workflow. Implement or adapt the component locally to fit the project's visual system, dependencies, and requirements.
+- Create a custom primitive when no suitable project component exists, and put it in `src/components/ui/`. Keep domain-specific compositions in their feature directory.
+- Use Tailwind CSS to style and compose project-owned primitives, avoiding duplicated structure and interaction behavior.
+- Keep business logic out of presentation primitives; feature components should own resource-specific behavior.
 
 ## Request flow
 
@@ -95,3 +166,13 @@ Local tests should verify that the dashboard can connect to the configured endpo
 Because AWS requests originate in the browser, this application does not provide a secure place to store long-lived AWS credentials. Never bundle permanent access keys or secrets into frontend source, build-time environment variables, or browser storage. Use the local emulator for local development; for real AWS environments, use an explicitly designed short-lived credential flow and restrict permissions to the required resources and actions.
 
 The browser must be able to reach the configured endpoint, and endpoint networking and CORS policy are the responsibility of that endpoint's environment. The frontend is responsible for presenting resource state and user actions, not for enforcing server-side authorization or protecting credentials.
+
+## Data Flow
+
+Prefer:
+
+```text
+UI → feature logic → service → backend
+```
+
+rather than coupling UI components directly to external data sources.

@@ -151,7 +151,7 @@ const client = new SQSClient({
 - Close button returns to queue list
 
 ### Purge Confirmation
-- shadcn/ui AlertDialog
+- Project-owned confirmation dialog following established accessible dialog patterns (shadcn/ui may be consulted as a reference)
 - Title: "Purge Queue"
 - Description: "This will permanently delete all messages in [queue name]. This action cannot be undone."
 - Buttons: Cancel, Purge (destructive variant)

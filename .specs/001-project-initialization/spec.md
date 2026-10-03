@@ -5,7 +5,7 @@
 - **Language**: TypeScript (strict mode)
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS v3
-- **UI Components**: shadcn/ui-inspired primitives and styling patterns, created manually to keep the setup lightweight and aligned with the local MinStack workflow
+- **UI Components**: Use project-owned primitives in `src/components/ui/`. Consult shadcn/ui only as a reference for common patterns and accessibility; implement components locally rather than downloading or generating shadcn/ui components.
 - **AWS SDK**: @aws-sdk/client-sqs
 - **Linting**: ESLint (airbnb-typescript or similar)
 - **Formatting**: Prettier
@@ -28,9 +28,9 @@ aws-local-dashboard/
 │   ├── App.tsx
 │   ├── routes.ts
 │   ├── components/
-│   │   └── ui/           # shadcn/ui components
+│   │   └── ui/           # Project-owned reusable UI components
 │   ├── lib/
-│   │   └── utils.ts      # shadcn/ui utility functions
+│   │   └── utils.ts      # Shared class-name utilities
 │   ├── services/
 │   │   └── aws.ts        # AWS client configuration
 │   └── styles/
@@ -86,8 +86,8 @@ aws-local-dashboard/
 
 ### Tailwind Config
 - Content paths: `./index.html`, `./src/**/*.{js,ts,jsx,tsx}`
-- Theme: extend with CSS variables for shadcn/ui theming
-- Plugins: tailwindcss-animate (for shadcn/ui)
+- Theme: project design tokens and CSS variables
+- Plugins: tailwindcss-animate for animation utilities
 
 ### TypeScript Config
 - Target: ES2020
@@ -115,15 +115,15 @@ services:
 
 Start the emulator with `docker compose up -d` and connect the dashboard to `http://localhost:4566`. The compose configuration must use the `ministackorg/ministack` image and expose port `4566` on the host.
 
-## shadcn/ui component setup
-The project uses shadcn/ui styling patterns and a minimal set of hand-authored UI primitives instead of running a one-off `npx shadcn@latest add card` command. This keeps the initial setup simpler and avoids pulling in unnecessary generated files for the base dashboard layout.
+## UI component setup
+The project maintains its own reusable UI primitives and styling. shadcn/ui may be consulted as a reference for patterns and accessibility, but its components are not downloaded or generated as part of setup.
 
 The project currently includes primitives such as:
 - `src/components/ui/button.tsx`
 - `src/components/ui/scroll-area.tsx`
 - `src/components/ui/separator.tsx`
-- `src/lib/utils.ts` (cn helper)
-- Tailwind CSS variables setup in globals.css
+- `src/lib/utils.ts` (class-name helper)
+- Project design tokens in `src/styles/globals.css`
 
 ## AWS Service Layer
 Create `src/services/aws.ts` with:

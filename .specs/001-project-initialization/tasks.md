@@ -4,7 +4,7 @@
 - [x] Create package.json with all dependencies and scripts
 - [x] Create tsconfig.json with strict mode and path aliases
 - [x] Create vite.config.ts with React plugin and aliases
-- [x] Create tailwind.config.ts with content paths and shadcn/ui theme
+- [x] Create tailwind.config.ts with content paths and project design tokens
 - [x] Create postcss.config.js with Tailwind and autoprefixer
 - [x] Create eslint.config.js with TypeScript and React rules
 - [x] Create .prettierrc with Tailwind plugin
@@ -15,13 +15,13 @@
 - [x] Create src/App.tsx (root component with Router)
 - [x] Create src/routes.ts (React Router route definitions)
 - [x] Create src/styles/globals.css (Tailwind imports + CSS variables)
-- [x] Create src/lib/utils.ts (shadcn/ui cn helper)
+- [x] Create src/lib/utils.ts (shared class-name helper)
 
-## Phase 3: shadcn/ui Initialization
-- [x] Set up the required shadcn/ui helper and primitive pattern files for the project
+## Phase 3: Project UI Component Setup
+- [x] Set up project-owned UI helpers and reusable primitive patterns, informed by common shadcn/ui references
 - [x] Verify src/components/ui/ directory exists
 - [x] Add at least one test component (Button) to verify setup
-- [x] Keep the UI setup intentionally minimal and avoid unnecessary CLI-generated single-component additions such as a Card component
+- [x] Keep the UI setup local to the project and avoid downloading or generating shadcn/ui components
 
 ## Phase 4: AWS Service Layer
 - [x] Create src/services/aws.ts with client factory functions

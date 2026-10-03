@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { ConnectionSettings } from '../types/settings';
 import { buildEndpoint } from '../types/settings';
 
@@ -27,7 +29,10 @@ function toDraft(settings: ConnectionSettings): DraftSettings {
   return { ...settings, port: String(settings.port) };
 }
 
-function validateDraft(draft: DraftSettings): { settings?: ConnectionSettings; errors: FieldErrors } {
+function validateDraft(draft: DraftSettings): {
+  settings?: ConnectionSettings;
+  errors: FieldErrors;
+} {
   const errors: FieldErrors = {};
   const host = draft.host.trim();
   const region = draft.region.trim();
@@ -131,8 +136,10 @@ export function ConnectionForm({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <label htmlFor="connection-host" className="text-sm font-medium text-slate-200">Host</label>
-          <input
+          <Label htmlFor="connection-host" className="text-slate-200">
+            Host
+          </Label>
+          <Input
             id="connection-host"
             name="host"
             value={draft.host}
@@ -140,14 +147,19 @@ export function ConnectionForm({
             aria-invalid={Boolean(errors.host)}
             aria-describedby={errors.host ? 'connection-host-error' : undefined}
             autoComplete="url"
-            className="h-10 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
           />
-          {errors.host && <p id="connection-host-error" role="alert" className="text-sm text-red-400">{errors.host}</p>}
+          {errors.host && (
+            <p id="connection-host-error" role="alert" className="text-sm text-red-400">
+              {errors.host}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="connection-port" className="text-sm font-medium text-slate-200">Port</label>
-          <input
+          <Label htmlFor="connection-port" className="text-slate-200">
+            Port
+          </Label>
+          <Input
             id="connection-port"
             name="port"
             type="number"
@@ -159,14 +171,19 @@ export function ConnectionForm({
             aria-invalid={Boolean(errors.port)}
             aria-describedby={errors.port ? 'connection-port-error' : undefined}
             inputMode="numeric"
-            className="h-10 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
           />
-          {errors.port && <p id="connection-port-error" role="alert" className="text-sm text-red-400">{errors.port}</p>}
+          {errors.port && (
+            <p id="connection-port-error" role="alert" className="text-sm text-red-400">
+              {errors.port}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="connection-region" className="text-sm font-medium text-slate-200">Region</label>
-          <input
+          <Label htmlFor="connection-region" className="text-slate-200">
+            Region
+          </Label>
+          <Input
             id="connection-region"
             name="region"
             value={draft.region}
@@ -174,9 +191,12 @@ export function ConnectionForm({
             aria-invalid={Boolean(errors.region)}
             aria-describedby={errors.region ? 'connection-region-error' : undefined}
             autoComplete="off"
-            className="h-10 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
           />
-          {errors.region && <p id="connection-region-error" role="alert" className="text-sm text-red-400">{errors.region}</p>}
+          {errors.region && (
+            <p id="connection-region-error" role="alert" className="text-sm text-red-400">
+              {errors.region}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-3 self-end pb-2">
@@ -188,19 +208,37 @@ export function ConnectionForm({
             onChange={(event) => setField('useHttps', event.target.checked)}
             className="h-4 w-4 accent-cyan-500"
           />
-          <label htmlFor="connection-https" className="text-sm font-medium text-slate-200">Use HTTPS</label>
+          <label htmlFor="connection-https" className="text-sm font-medium text-slate-200">
+            Use HTTPS
+          </label>
         </div>
       </div>
 
       <div className="rounded-md border border-slate-800 bg-slate-950/70 px-3 py-2">
         <p className="text-xs uppercase text-slate-500">Effective endpoint</p>
-        <p className="mt-1 break-all font-mono text-sm text-slate-200">{preview ?? 'Complete valid settings to preview endpoint'}</p>
+        <p className="mt-1 break-all font-mono text-sm text-slate-200">
+          {preview ?? 'Complete valid settings to preview endpoint'}
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button type="submit" disabled={saving || resetting}>{saving ? 'Saving...' : 'Save'}</Button>
-        <Button type="button" variant="outline" onClick={handleCancel} disabled={saving || resetting}>Cancel</Button>
-        <Button type="button" variant="outline" onClick={handleTest} disabled={testStatus === 'pending' || saving || resetting}>
+        <Button type="submit" disabled={saving || resetting}>
+          {saving ? 'Saving...' : 'Save'}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleCancel}
+          disabled={saving || resetting}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleTest}
+          disabled={testStatus === 'pending' || saving || resetting}
+        >
           {testStatus === 'pending' ? 'Testing...' : 'Test Connection'}
         </Button>
         <Button type="button" variant="ghost" onClick={handleReset} disabled={saving || resetting}>
@@ -208,8 +246,16 @@ export function ConnectionForm({
         </Button>
       </div>
 
-      {testStatus === 'success' && <p role="status" className="text-sm text-emerald-300">Connection test succeeded.</p>}
-      {testStatus === 'error' && <p role="alert" className="text-sm text-red-300">{testError || 'Connection test failed.'}</p>}
+      {testStatus === 'success' && (
+        <p role="status" className="text-sm text-emerald-300">
+          Connection test succeeded.
+        </p>
+      )}
+      {testStatus === 'error' && (
+        <p role="alert" className="text-sm text-red-300">
+          {testError || 'Connection test failed.'}
+        </p>
+      )}
     </form>
   );
 }

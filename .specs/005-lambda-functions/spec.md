@@ -8,7 +8,7 @@ graph TB
         SettingsCtx[SettingsContext<br/>endpoint, region]
         AWSFactory[createLambdaClient()<br/>extends createSqsClient pattern]
         ReactQuery[TanStack React Query<br/>caching, invalidation]
-        UIPrimitives[shadcn/ui Components<br/>Table, Dialog, Button, etc.]
+        UIPrimitives[Project UI Components<br/>Table, Dialog, Button, etc.]
     end
 
     subgraph LambdaFeature[Lambda Feature Module]

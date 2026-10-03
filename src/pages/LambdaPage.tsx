@@ -1,19 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFunctions } from '@/features/lambda/hooks';
 import { FunctionTable } from '@/features/lambda/components/FunctionTable';
-import { FunctionDetailDialog } from '@/features/lambda/components/FunctionDetailDialog';
 import { InvocationPanel } from '@/features/lambda/components/InvocationPanel';
 import { RefreshButton } from '@/features/sqs/components/RefreshButton';
 import { toast } from '@/hooks/use-toast';
+import { useState } from 'react';
 import type { LambdaFunction } from '@/features/lambda/types/lambda';
 
 export default function LambdaPage() {
+  const navigate = useNavigate();
   const { functions, loading, error, refetch } = useFunctions();
 
-  const [selectedFunction, setSelectedFunction] = useState<LambdaFunction | null>(null);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [invocationPanelOpen, setInvocationPanelOpen] = useState(false);
   const [functionToInvoke, setFunctionToInvoke] = useState<LambdaFunction | null>(null);
 
@@ -23,8 +22,7 @@ export default function LambdaPage() {
   };
 
   const handleViewDetails = (fn: LambdaFunction) => {
-    setSelectedFunction(fn);
-    setDetailDialogOpen(true);
+    navigate(`/lambda/${fn.functionName}`);
   };
 
   const handleRefresh = () => {
@@ -66,12 +64,6 @@ export default function LambdaPage() {
         loading={loading}
         onInvoke={handleInvoke}
         onViewDetails={handleViewDetails}
-      />
-
-      <FunctionDetailDialog
-        function={selectedFunction}
-        open={detailDialogOpen}
-        onOpenChange={setDetailDialogOpen}
       />
 
       <InvocationPanel
