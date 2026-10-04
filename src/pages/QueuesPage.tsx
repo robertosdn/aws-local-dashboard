@@ -71,7 +71,7 @@ export default function QueuesPage() {
         <h2 className="mt-3 text-2xl font-semibold text-white">Queues</h2>
         <div className="mt-4 text-red-300">
           <p>Failed to connect to SQS endpoint</p>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="mt-1 text-sm text-slate-400">
             {error instanceof Error ? error.message : 'Unknown error'}
           </p>
           <Button variant="outline" onClick={handleRefresh} className="mt-4">

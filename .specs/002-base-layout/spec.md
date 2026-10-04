@@ -24,10 +24,11 @@ App
     │   ├── Logo/Brand
     │   ├── NavItem (Dashboard)
     │   ├── NavItem (Queues)
-    │   ├── NavItem (S3, Em breve)
-    │   ├── NavItem (DynamoDB, Em breve)
-    │   ├── NavItem (EventBridge EventBus, Em breve)
-    │   ├── NavItem (EventBridge Scheduler, Em breve)
+    │   ├── NavItem (Lambda)
+    │   ├── NavItem (DynamoDB)
+    │   ├── NavItem (S3)
+    │   ├── NavItem (EventBridge EventBus, Soon)
+    │   ├── NavItem (EventBridge Scheduler, Soon)
     │   └── NavItem (Settings)
     └── MainContent
         ├── Header (page title + actions)
@@ -73,8 +74,9 @@ App
 export const navigation = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/queues', label: 'Queues', icon: MessageSquare },
-  { path: '/s3', label: 'S3', icon: HardDrive, comingSoon: true },
-  { path: '/dynamodb', label: 'DynamoDB', icon: Database, comingSoon: true },
+  { path: '/lambda', label: 'Lambda', icon: FunctionSquare },
+  { path: '/dynamodb', label: 'DynamoDB', icon: Database },
+  { path: '/s3', label: 'S3', icon: HardDrive },
   {
     path: '/eventbridge/eventbus',
     label: 'EventBridge (EventBus)',

@@ -66,11 +66,13 @@
 
 ## Phase 8: Planned Resource Navigation
 
-- [x] Add S3 and DynamoDB sidebar entries with a `Soon` badge
-- [x] Add EventBridge (EventBus) and EventBridge (Scheduler) sidebar entries with a `Soon` badge
-- [x] Keep EventBridge entries without routes non-interactive and accessible
-- [x] Add unit tests for planned-resource labels and disabled navigation metadata
-- [x] Verify the sidebar entries and disabled behavior in a browser
+- [X] Add S3 and DynamoDB sidebar entries, initially with a `Soon` badge
+- [X] Place S3 after DynamoDB in the sidebar navigation order
+- [X] Add EventBridge (EventBus) and EventBridge (Scheduler) sidebar entries with a `Soon` badge
+- [X] Keep EventBridge entries without routes non-interactive and accessible
+- [X] Add unit tests for planned-resource labels and disabled navigation metadata
+- [X] Verify the sidebar entries and disabled behavior in a browser
+- [X] Remove the `Soon` badge from S3 after implementing its bucket browser
 
 ## Phase 9: Endpoint Status Polling
 

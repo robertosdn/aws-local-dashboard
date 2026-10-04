@@ -26,10 +26,25 @@ Enable developers to inspect S3 buckets in their local AWS-compatible environmen
 **So that** I can inspect the objects stored in it
 
 **Acceptance Criteria:**
-- Selecting a bucket displays its objects
+- Selecting `Open` for a bucket displays its objects; `View` opens metadata/configuration instead
 - For each object, display its name, size, and last-modified date when available
 - Support browsing buckets with more objects than can be shown at once
 - Show a clear empty state when a bucket contains no objects
+- Provide a way to return to the bucket list
+
+### US-005: View Bucket Metadata and Configuration
+**As a** developer
+
+**I want to** view a bucket's metadata and read-only configuration
+
+**So that** I can inspect its setup without opening its objects
+
+**Acceptance Criteria:**
+- Provide a `View` action separate from `Open`
+- Show the bucket creation date and AWS region
+- Show versioning status, default encryption algorithms, and public access block settings
+- Clearly identify optional configurations that are not configured
+- Show request failures and allow retry instead of displaying incomplete configuration as successful
 - Provide a way to return to the bucket list
 
 ### US-003: Delete an Object

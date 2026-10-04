@@ -20,10 +20,10 @@ export type NavigationItem = {
 
 export const navigation: NavigationItem[] = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/queues', label: 'Queues', icon: MessageSquare },
-  { path: '/s3', label: 'S3', icon: HardDrive, comingSoon: true },
+  { path: '/queues', label: 'SQS', icon: MessageSquare },
   { path: '/lambda', label: 'Lambda', icon: FunctionSquare },
-  { path: '/dynamodb', label: 'DynamoDB', icon: Database, comingSoon: true },
+  { path: '/dynamodb', label: 'DynamoDB', icon: Database },
+  { path: '/s3', label: 'S3', icon: HardDrive },
   {
     path: '/eventbridge/eventbus',
     label: 'EventBridge (EventBus)',

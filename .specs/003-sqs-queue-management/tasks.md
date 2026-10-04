@@ -2,78 +2,78 @@
 
 ## Phase 1: Project Setup & Types
 
-- [X] Initialize React + TypeScript + Vite project
-- [X] Install dependencies: react-router-dom, @aws-sdk/client-sqs, @tanstack/react-query, lucide-react, clsx, tailwind-merge
-- [X] Configure Tailwind CSS with project design tokens, using common UI patterns as reference
-- [X] Create `src/features/sqs/types/sqs.ts` with Queue/Message interfaces
-- [X] Set up environment variables (VITE_AWS_ENDPOINT, VITE_AWS_REGION)
+- [x] Initialize React + TypeScript + Vite project
+- [x] Install dependencies: react-router-dom, @aws-sdk/client-sqs, @tanstack/react-query, lucide-react, clsx, tailwind-merge
+- [x] Configure Tailwind CSS with project design tokens, using common UI patterns as reference
+- [x] Create `src/features/sqs/types/sqs.ts` with Queue/Message interfaces
+- [x] Set up environment variables (VITE_AWS_ENDPOINT, VITE_AWS_REGION)
 
 ## Phase 2: API Client
 
-- [X] Create `src/features/sqs/api/sqs.ts` with SQSClient configuration
-- [X] Implement `listQueues()` - ListQueues + GetQueueAttributes for each
-- [X] Implement `receiveMessages(queueUrl)` - ReceiveMessage for peek
-- [X] Implement `purgeQueue(queueUrl)` - PurgeQueue action
-- [X] Add error handling with typed error responses
+- [x] Create `src/features/sqs/api/sqs.ts` with SQSClient configuration
+- [x] Implement `listQueues()` - ListQueues + GetQueueAttributes for each
+- [x] Implement `receiveMessages(queueUrl)` - ReceiveMessage for peek
+- [x] Implement `purgeQueue(queueUrl)` - PurgeQueue action
+- [x] Add error handling with typed error responses
 
 ## Phase 3: React Query Hooks
 
-- [X] Create `src/features/sqs/hooks/useQueues.ts`
+- [x] Create `src/features/sqs/hooks/useQueues.ts`
   - useQuery for queue list with refetch interval
   - Invalidate on purge success
-- [X] Create `src/features/sqs/hooks/useQueueMessages.ts`
+- [x] Create `src/features/sqs/hooks/useQueueMessages.ts`
   - useQuery enabled when queueUrl provided
   - Stale time: 30 seconds
-- [X] Create `src/features/sqs/hooks/usePurgeQueue.ts`
+- [x] Create `src/features/sqs/hooks/usePurgeQueue.ts`
   - useMutation with onSuccess invalidating queues
 
 ## Phase 4: UI Components
 
-- [X] Create `src/features/sqs/components/QueueTable.tsx`
+- [x] Create `src/features/sqs/components/QueueTable.tsx`
   - TanStack Table or simple HTML table
   - Loading skeleton rows
   - Empty state
-- [X] Create `src/features/sqs/components/QueueRow.tsx`
+- [x] Create `src/features/sqs/components/QueueRow.tsx`
   - Queue name (link to messages)
   - Message counts badges
   - View Messages button
   - Purge button (opens dialog) with a cleaning/brush icon
   - Omit the "Open in AWS console" action
-- [X] Create `src/features/sqs/components/MessageViewer.tsx`
+- [x] Create `src/features/sqs/components/MessageViewer.tsx`
   - Modal (Dialog) component
   - MessageList child
   - Close handler
-- [X] Create `src/features/sqs/components/MessageList.tsx`
+- [x] Create `src/features/sqs/components/MessageList.tsx`
   - Paginated table (10 per page)
   - JSON formatted body display
   - Message attributes expandable row
-- [X] Create `src/features/sqs/components/PurgeConfirmDialog.tsx`
+- [x] Create `src/features/sqs/components/PurgeConfirmDialog.tsx`
   - AlertDialog with queue name
   - Destructive confirm button
   - Calls purge mutation
-- [X] Create `src/features/sqs/components/RefreshButton.tsx`
+- [x] Create `src/features/sqs/components/RefreshButton.tsx`
   - Icon button with spin animation
   - Calls refetch from useQueues
 
 ## Phase 5: Page & Routing
 
-- [X] Create `src/pages/SQSQueuesPage.tsx` (implemented as QueuesPage.tsx)
-  - Page header with title + refresh button
+- [x] Create `src/pages/SQSQueuesPage.tsx` (implemented as QueuesPage.tsx)
+  - Page header titled `Queues` with the SQS service label and refresh button
   - QueueTable component
   - MessageViewer modal state
-- [X] Add `/queues` route in router config (already existed)
-- [X] Add navigation link in main layout/sidebar (already existed)
+- [x] Add `/queues` route in router config (already existed)
+- [x] Add navigation link in main layout/sidebar (already existed)
 
 ## Phase 6: Polish & Validation
 
-- [X] Add toast notifications (success/error)
-- [X] Implement responsive design (mobile table scroll)
-- [X] Add keyboard navigation support
-- [X] Add ARIA labels for accessibility
-- [X] Test with ministack running on localhost:4566
-- [X] Verify: list queues, view messages, purge queue
-- [X] Verify: queue row has no AWS console link and uses a cleaning icon for purge
-- [X] Run lint and typecheck
+- [x] Add toast notifications (success/error)
+- [x] Implement responsive design (mobile table scroll)
+- [x] Add keyboard navigation support
+- [x] Add ARIA labels for accessibility
+- [x] Test with ministack running on localhost:4566
+- [x] Verify: list queues, view messages, purge queue
+- [x] Verify: queue row has no AWS console link and uses a cleaning icon for purge
+- [x] Run lint and typecheck
 
 ## Dependencies to Install
 

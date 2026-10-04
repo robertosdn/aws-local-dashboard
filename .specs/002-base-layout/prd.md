@@ -14,7 +14,9 @@ Provide a consistent, navigable shell for the AWS Local Dashboard so users can s
 - The status indicator must continuously reflect the current emulator availability and update visually when the endpoint changes between online and offline states
 - Main content area that updates when user selects a different resource type
 - Initial resource types: SQS, S3, Lambda, and DynamoDB
-- Sidebar entries for S3, DynamoDB, EventBridge (EventBus), and EventBridge (Scheduler) display a `Soon` status badge
+- Sidebar resource order places DynamoDB before S3
+- Implemented S3 and DynamoDB sidebar entries are active and have no `Soon` badge
+- EventBridge (EventBus) and EventBridge (Scheduler) entries display a `Soon` status badge
 - EventBridge entries that do not yet have application routes are visibly inactive and cannot navigate to a missing page
 - Clear visual indication of which resource type is currently active
 - Works on desktop, tablet, and mobile screens

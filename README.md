@@ -5,7 +5,6 @@ A client-side AWS resource dashboard for local development. Connects directly to
 **Live Demo:** https://robertosdn.github.io/aws-local-dashboard/
 
 
-
 ## Features
 
 - **SQS Queue Management**
@@ -34,10 +33,48 @@ A client-side AWS resource dashboard for local development. Connects directly to
 - Node.js 18+
 - [ministack](https://github.com/ministackorg/ministack) or LocalStack running on port 4566
 
+### Start a local AWS-compatible endpoint
+
+The repository includes a [`docker-compose.yml`](./docker-compose.yml) for
+MinStack. Start it from the repository root:
+
 ```bash
-# Start ministack (example)
-docker run -p 4566:4566 ministackorg/ministack
+docker compose up -d
 ```
+
+```yaml
+services:
+  ministack:
+    image: ministackorg/ministack
+    ports:
+      - "4566:4566"
+```
+
+To use LocalStack instead, start it on the same port and allow the dashboard's
+development-server origins. `localhost` and `127.0.0.1` are different browser
+origins, so allow both if you may open the dashboard using either address:
+
+```yaml
+services:
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      EXTRA_CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,https://robertosdn.github.io"
+```
+
+Save this as a Compose file (for example, `docker-compose.localstack.yml`) and
+start LocalStack with:
+
+```bash
+docker compose -f docker-compose.localstack.yml up -d
+```
+
+Run only one emulator on port `4566` at a time. If you use a different
+development-server host or port, add that exact origin to
+`EXTRA_CORS_ALLOWED_ORIGINS`. Restart the LocalStack container after changing
+its configuration.
 
 ### Installation
 
