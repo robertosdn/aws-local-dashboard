@@ -70,17 +70,27 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
         <ScrollArea className="flex-1 px-3 py-4">
           <div className="space-y-2">
-            {navigation.map(({ path, label, icon: Icon, comingSoon }) => (
+            {navigation.map(({ path, label, icon: Icon, comingSoon, disabled }) => (
               <NavLink
                 key={path}
                 to={path}
-                onClick={onClose}
+                aria-disabled={disabled || undefined}
+                tabIndex={disabled ? -1 : undefined}
+                onClick={(event) => {
+                  if (disabled) {
+                    event.preventDefault();
+                    return;
+                  }
+                  onClose();
+                }}
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                     isActive
                       ? 'bg-cyan-500/10 text-cyan-300 ring-1 ring-inset ring-cyan-500/30'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+                      : disabled
+                        ? 'cursor-not-allowed text-slate-500'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white',
                   )
                 }
               >
@@ -88,7 +98,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                 <span>{label}</span>
                 {comingSoon && (
                   <span className="ml-auto rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-300">
-                    Coming soon
+                    Soon
                   </span>
                 )}
               </NavLink>

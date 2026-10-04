@@ -55,6 +55,3 @@ When implementing tasks from `tasks.md`, mark completed tasks with `[X]` prefix 
 - **Never** bundle permanent AWS credentials in frontend source, build-time env vars, or browser storage
 - Use local emulator for development
 - For real AWS: use short-lived credential flows with minimal permissions
-
-## Current State
-The project is a working React + TypeScript + Vite dashboard with AWS-compatible endpoint settings, Amazon SQS queue workflows, and AWS Lambda inspection/invocation. S3 and DynamoDB pages are placeholders for future features.

@@ -54,6 +54,10 @@
 - [X] Run lint and typecheck
 - [X] Test complete flow: change settings → save → verify queues reload
 
+## Phase 8: Background Connection Status
+- [X] Poll endpoint availability every 30 seconds while connection status consumers are mounted
+- [X] Verify the configured polling interval with a unit test and browser check
+
 ## Dependencies to Install
 
 ```json

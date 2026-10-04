@@ -169,6 +169,12 @@ async function testConnection(endpoint: string, region: string): Promise<boolean
 }
 ```
 
+### Background Connection Status Polling
+- The application-wide endpoint status hook (`src/lib/useEndpointStatus.ts`) checks the configured endpoint immediately when mounted.
+- While mounted, it repeats the availability check every 30 seconds.
+- A successful endpoint response sets the status to `ONLINE`; a failed or timed-out check sets it to `OFFLINE`.
+- Changing the configured endpoint restarts the check using the new endpoint.
+
 ## React Query Integration
 
 ### Invalidating Queries on Settings Change
