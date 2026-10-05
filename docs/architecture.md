@@ -42,10 +42,20 @@ tests/
 └── pages/
 
 scripts/
-├── create-*.mjs
-├── *-test-data.mjs
-└── *-test-data.test.mjs
+├── create-*.mjs              # Provision resources in local emulator
+├── *-test-data.mjs           # Add deterministic sample data
+└── *-test-data.test.mjs      # Validate helper scripts (not business logic tests)
 ```
+
+### `scripts/` — Test Resource Helpers
+
+The `scripts/` directory contains Node.js helpers that provision and exercise local AWS test resources for development. These are **setup helpers only**, not business logic:
+
+- **Provisioning scripts** (e.g., `create-s3-test-bucket.mjs`, `create-dynamodb-test-table.mjs`, `create-sqs-lambda.mjs`): Create resources in the local emulator (MinStack). Safe to rerun; use dummy credentials; target `localhost:4566` by default.
+- **Data seeding scripts** (e.g., `s3-test-data.mjs`, `dynamodb-test-data.mjs`, `put-dynamodb-test-items.mjs`, `send-sqs-test-message.mjs`): Insert deterministic sample data so the dashboard has content to display.
+- **Validation tests** (e.g., `s3-test-data.test.mjs`, `dynamodb-test-data.test.mjs`): Verify the helper scripts work correctly. These are **not** unit tests for application code — they only validate the helper scripts themselves.
+
+Unit tests for application code belong in `tests/` and follow the conventions below. The `scripts/` helpers do not use the `@/` alias or the `tests/` structure.
 
 ## Testing Conventions
 
@@ -57,7 +67,7 @@ Test files are located in a top-level `tests/` directory that mirrors the `src/`
 - Tests import source modules using the `@/` alias (e.g., `@/lib/useEndpointStatus`)
 - The `tsconfig.json` includes both `src` and `tests` in the `include` array for type checking
 - Vitest is configured in `vitest.config.ts` with the `@/` alias and includes `tests/**/*.test.{ts,tsx}` and `scripts/**/*.test.mjs`
-- Test helper scripts in `scripts/` (e.g., `s3-test-data.test.mjs`, `dynamodb-test-data.test.mjs`) validate test data setup for the local emulator
+- **Test helper scripts in `scripts/` (e.g., `s3-test-data.test.mjs`, `dynamodb-test-data.test.mjs`) validate the helper scripts themselves — they are not application unit tests and do not follow the `tests/` conventions.**
 
 ## Responsibilities
 

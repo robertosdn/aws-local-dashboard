@@ -17,6 +17,8 @@ Only after confirming these decisions, create the feature documents in `.specs/N
 
 For every new AWS resource feature, create two dedicated scripts in `scripts/`: one to create the resource and another to add deterministic sample data to it. Keep these scripts specific to that AWS resource type; do not add provisioning for a different resource type to an existing resource's scripts (for example, keep DynamoDB setup separate from SQS setup). The feature `spec.md` must specify both scripts, and `tasks.md` must include separate implementation and verification tasks for creating the resource and adding sample data. This is local data setup for the feature, not a substitute for unit tests, UI/e2e validation, or scripts that exercise resource operations. Require local endpoint defaults, dummy credentials, safe reruns without deleting existing resources, and no use with real AWS credentials or endpoints.
 
+The `scripts/` directory contains provisioning helpers (e.g., `create-s3-test-bucket.mjs`, `s3-test-data.mjs`) and their validation tests (e.g., `s3-test-data.test.mjs`). These are **setup helpers only** - they provision test resources in the local emulator and are not business logic. They do not need to follow the `tests/` directory conventions or the `@/` import alias. Unit tests for application code belong in `tests/`.
+
 Choose `NNN` as the next sequential number after the highest-numbered directory
 already present in `.specs/`. Numbering is global and never restarts for a
 different feature context: a new feature for the same service, domain, or
