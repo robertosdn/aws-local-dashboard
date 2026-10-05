@@ -2,7 +2,14 @@
 
 See `.specs/` for specification documents and templates.
 
-When asked to create a new feature, only create the feature documents in `.specs/NNN-feature_name/` containing:
+When asked to create a new feature, the agent should first ask clarifying questions to confirm design decisions before generating any documents. This includes questions about:
+- Action buttons (View, Items, Open, Delete, etc.)
+- Pagination and data loading patterns
+- Detail view requirements
+- Any resource-specific UI conventions from `docs/ui-patterns.md`
+- Architectural decisions: API layer patterns, hook patterns, component composition, state management, shared service reuse vs. feature-specific implementations
+
+Only after confirming these decisions, create the feature documents in `.specs/NNN-feature_name/` containing:
 
 - `prd.md` - Product Requirements Document (product/usability requirements ONLY, no technical details)
 - `spec.md` - Technical Specification (architecture, data structures, APIs, implementation details)
