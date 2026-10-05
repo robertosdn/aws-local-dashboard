@@ -11,6 +11,7 @@ const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const endpoint = process.env.AWS_ENDPOINT ?? 'http://localhost:4566';
 const region = process.env.AWS_REGION ?? 'us-east-1';
 const queueName = process.env.QUEUE_NAME ?? 'dashboard-lambda-events';
+const standaloneQueueName = process.env.STANDALONE_QUEUE_NAME ?? 'dashboard-standalone-queue';
 const functionName = process.env.FUNCTION_NAME ?? 'dashboard-sqs-consumer';
 const roleArn =
   process.env.LAMBDA_ROLE_ARN ?? 'arn:aws:iam::000000000000:role/lambda-role';
@@ -72,6 +73,20 @@ async function main() {
     'text',
   );
   console.log(`SQS queue created: ${queueUrl}`);
+
+  const standaloneQueueUrl = awsValue(
+    'sqs',
+    'create-queue',
+    '--queue-name',
+    standaloneQueueName,
+    '--endpoint-url',
+    endpoint,
+    '--query',
+    'QueueUrl',
+    '--output',
+    'text',
+  );
+  console.log(`Standalone SQS queue created (no event source): ${standaloneQueueUrl}`);
 
   const queueArn = awsValue(
     'sqs',

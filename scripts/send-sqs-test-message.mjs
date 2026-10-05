@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process';
 const endpoint = process.env.AWS_ENDPOINT ?? 'http://localhost:4566';
 const region = process.env.AWS_REGION ?? 'us-east-1';
 const queueName = process.env.QUEUE_NAME ?? 'dashboard-lambda-events';
+const standaloneQueueName = process.env.STANDALONE_QUEUE_NAME ?? 'dashboard-standalone-queue';
 const messageBody =
   process.argv[2] ??
   process.env.MESSAGE_BODY ??
@@ -69,6 +70,35 @@ try {
   );
 
   console.log(`Message sent to ${queueName} (${queueUrl}). Message ID: ${messageId}`);
+
+  const standaloneQueueUrl = awsValue(
+    'sqs',
+    'get-queue-url',
+    '--queue-name',
+    standaloneQueueName,
+    '--endpoint-url',
+    endpoint,
+    '--query',
+    'QueueUrl',
+    '--output',
+    'text',
+  );
+  const standaloneMessageId = awsValue(
+    'sqs',
+    'send-message',
+    '--queue-url',
+    standaloneQueueUrl,
+    '--message-body',
+    messageBody,
+    '--endpoint-url',
+    endpoint,
+    '--query',
+    'MessageId',
+    '--output',
+    'text',
+  );
+
+  console.log(`Message sent to ${standaloneQueueName} (${standaloneQueueUrl}). Message ID: ${standaloneMessageId}`);
 } catch (error) {
   console.error(`Could not send a test message to SQS queue "${queueName}".`);
   console.error(error);
