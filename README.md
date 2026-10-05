@@ -178,6 +178,9 @@ queue or endpoint.
 ## Documentation
 
 - Architecture: [`docs/architecture.md`](docs/architecture.md)
+- UI Patterns: [`docs/ui-patterns.md`](docs/ui-patterns.md)
+- Constitution: [`docs/constitution.md`](docs/constitution.md)
+- Product: [`docs/product.md`](docs/product.md)
 - Specifications: [`.specs/`](.specs/)
 
 ## License

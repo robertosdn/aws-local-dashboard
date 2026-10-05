@@ -9,14 +9,22 @@ Client-side AWS resource dashboard (React + React Router + Tailwind with project
 - All documentation must be written in English
 - All flow diagrams or architecture overview or Request/sequence flows must use Mermaid.js
 
-## Architecture and UI Components
+## Architecture, UI Components & Documentation
 
-See `docs/architecture.md` for the current architecture, request flow, security boundaries, and UI component rules.
+See `docs/` for full documentation:
+
+- `docs/architecture.md` — System architecture, request flow, security boundaries
+- `docs/ui-patterns.md` — UI conventions: page headers, action buttons (View/Items/Open/Delete), sidebar labels, detail views, design tokens
+- `docs/constitution.md` — Project principles
+- `docs/product.md` — Product overview
+
+### Implementation Rules
 
 - Reuse or extend project-owned primitives in `src/components/ui/` before creating another UI component.
 - Consult shadcn/ui as a reference for established component patterns and accessibility; do not install or generate its components by default.
 - Implement and maintain reusable primitives locally to match this project's visual system and dependencies.
 - Keep the existing React Router + Vite application; do not scaffold another framework for UI components.
+- Follow `docs/ui-patterns.md` for page structure, action buttons, and resource page conventions.
 
 ## SDD Specifications
 
