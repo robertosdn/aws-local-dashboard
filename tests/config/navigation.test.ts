@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { navigation } from './navigation';
+import { navigation } from '@/config/navigation';
 
 describe('resource navigation', () => {
   it('shows only EventBridge EventBus and Scheduler as coming soon', () => {

@@ -39,8 +39,8 @@ vi.mock('@/features/dynamodb/hooks', () => ({
   useDeleteTable: hooks.useDeleteTable,
 }));
 
-import QueuesPage from './QueuesPage';
-import DynamoDbPage from './DynamoDbPage';
+import QueuesPage from '@/pages/QueuesPage';
+import DynamoDbPage from '@/pages/DynamoDbPage';
 
 describe('resource page titles', () => {
   afterEach(cleanup);

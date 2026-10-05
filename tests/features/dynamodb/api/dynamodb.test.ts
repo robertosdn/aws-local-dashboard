@@ -32,7 +32,7 @@ import {
   listTablesWithDetails,
   queryItems,
   scanItems,
-} from './dynamodb';
+} from '@/features/dynamodb/api/dynamodb';
 
 const tableDescription = {
   TableName: 'sample-table',

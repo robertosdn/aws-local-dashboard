@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['dist', 'tailwind.config.ts', 'vite.config.ts'],
+    ignores: ['dist', 'tailwind.config.ts', 'vite.config.ts', 'vitest.config.ts'],
   },
   {
     files: ['**/*.{ts,tsx}'],

@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { BucketContents } from './BucketContents';
-import { BucketDetails } from './BucketDetails';
-import { BucketList } from './BucketList';
-import { DeleteConfirmDialog } from './DeleteConfirmDialog';
-import { formatSize } from './formatSize';
+import { BucketContents } from '@/features/s3/components/BucketContents';
+import { BucketDetails } from '@/features/s3/components/BucketDetails';
+import { BucketList } from '@/features/s3/components/BucketList';
+import { DeleteConfirmDialog } from '@/features/s3/components/DeleteConfirmDialog';
+import { formatSize } from '@/features/s3/components/formatSize';
 
 describe('S3 components', () => {
   afterEach(cleanup);

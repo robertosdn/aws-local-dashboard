@@ -16,13 +16,48 @@ src/
 ├── features/
 │   ├── lambda/
 │   ├── settings/
+│   ├── s3/
+│   ├── dynamodb/
 │   └── sqs/
 ├── lib/
 ├── pages/
 ├── services/
 ├── App.tsx
 └── routes.ts
+
+tests/
+├── lib/
+├── config/
+├── features/
+│   ├── s3/
+│   │   ├── api/
+│   │   ├── hooks/
+│   │   └── components/
+│   ├── dynamodb/
+│   │   ├── api/
+│   │   ├── hooks/
+│   │   └── components/
+│   └── sqs/
+│       └── api/
+└── pages/
+
+scripts/
+├── create-*.mjs
+├── *-test-data.mjs
+└── *-test-data.test.mjs
 ```
+
+## Testing Conventions
+
+Test files are located in a top-level `tests/` directory that mirrors the `src/` structure. This keeps test code separate from production source while maintaining clear organization.
+
+- Unit tests for utilities, hooks, and API functions live under `tests/` mirroring their source locations
+- Component tests use `@testing-library/react` with `jsdom` environment
+- API tests use Vitest with a local HTTP server to verify request/response behavior
+- Tests import source modules using the `@/` alias (e.g., `@/lib/useEndpointStatus`)
+- The `tsconfig.json` includes both `src` and `tests` in the `include` array for type checking
+- Vitest is configured in `vitest.config.ts` with the `@/` alias and includes `tests/**/*.test.{ts,tsx}` and `scripts/**/*.test.mjs`
+- Test helper scripts in `scripts/` (e.g., `s3-test-data.test.mjs`, `dynamodb-test-data.test.mjs`) validate test data setup for the local emulator
 
 ## Responsibilities
 

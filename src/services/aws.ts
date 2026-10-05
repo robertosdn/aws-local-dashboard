@@ -14,6 +14,18 @@ export type AwsClientConfig = {
   };
 };
 
+function isLocalAwsEndpoint(endpoint: string): boolean {
+  const hostname = new URL(endpoint).hostname.toLowerCase();
+  return (
+    hostname === 'localhost' ||
+    hostname.endsWith('.localhost') ||
+    hostname === '127.0.0.1' ||
+    hostname === '[::1]' ||
+    hostname === 'localstack' ||
+    hostname === 'ministack'
+  );
+}
+
 export function createSqsClient(config: AwsClientConfig = {}) {
   const {
     endpoint = 'http://localhost:4566',
@@ -24,11 +36,34 @@ export function createSqsClient(config: AwsClientConfig = {}) {
     },
   } = config;
 
-  return new SQSClient({
+  const client = new SQSClient({
     region,
     endpoint,
     credentials,
   });
+
+  if (isLocalAwsEndpoint(endpoint)) {
+    client.middlewareStack.add(
+      (next) => async (args) => {
+        if (
+          typeof args.request === 'object' &&
+          args.request !== null &&
+          'headers' in args.request &&
+          typeof args.request.headers === 'object' &&
+          args.request.headers !== null
+        ) {
+          Reflect.deleteProperty(args.request.headers, 'x-amzn-query-mode');
+        }
+        return next(args);
+      },
+      {
+        name: 'removeSqsQueryModeHeader',
+        step: 'build',
+      },
+    );
+  }
+
+  return client;
 }
 
 export function createLambdaClient(config: AwsClientConfig = {}) {

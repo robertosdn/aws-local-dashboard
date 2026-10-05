@@ -8,12 +8,12 @@ import {
   listTablesWithDetails,
   queryItems,
   scanItems,
-} from '../api/dynamodb';
-import { useDeleteItem } from './useDeleteItem';
-import { useDeleteTable } from './useDeleteTable';
-import { useQueryItems } from './useQueryItems';
-import { useScanItems } from './useScanItems';
-import { useTables } from './useTables';
+} from '@/features/dynamodb/api/dynamodb';
+import { useDeleteItem } from '@/features/dynamodb/hooks/useDeleteItem';
+import { useDeleteTable } from '@/features/dynamodb/hooks/useDeleteTable';
+import { useQueryItems } from '@/features/dynamodb/hooks/useQueryItems';
+import { useScanItems } from '@/features/dynamodb/hooks/useScanItems';
+import { useTables } from '@/features/dynamodb/hooks/useTables';
 
 vi.mock('@/features/settings/hooks/useSettings', () => ({
   useSettings: () => ({
@@ -22,7 +22,7 @@ vi.mock('@/features/settings/hooks/useSettings', () => ({
   }),
 }));
 
-vi.mock('../api/dynamodb', () => ({
+vi.mock('@/features/dynamodb/api/dynamodb', () => ({
   deleteItem: vi.fn(),
   deleteTable: vi.fn(),
   describeTable: vi.fn(),

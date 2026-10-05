@@ -25,7 +25,7 @@ import {
   getBucketDetails,
   listBucketObjects,
   listBuckets,
-} from './s3';
+} from '@/features/s3/api/s3';
 
 describe('S3 API', () => {
   beforeEach(() => {

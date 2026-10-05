@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DeleteConfirmDialog } from './DeleteConfirmDialog';
-import { ItemQueryForm } from './ItemQueryForm';
-import { ItemResults } from './ItemResults';
-import { ScanForm } from './ScanForm';
-import { TableList } from './TableList';
-import { TableDetails } from './TableDetails';
-import { ItemPagination } from './ItemPagination';
+import { DeleteConfirmDialog } from '@/features/dynamodb/components/DeleteConfirmDialog';
+import { ItemQueryForm } from '@/features/dynamodb/components/ItemQueryForm';
+import { ItemResults } from '@/features/dynamodb/components/ItemResults';
+import { ScanForm } from '@/features/dynamodb/components/ScanForm';
+import { TableList } from '@/features/dynamodb/components/TableList';
+import { TableDetails } from '@/features/dynamodb/components/TableDetails';
+import { ItemPagination } from '@/features/dynamodb/components/ItemPagination';
 
 describe('DynamoDB components', () => {
   afterEach(cleanup);

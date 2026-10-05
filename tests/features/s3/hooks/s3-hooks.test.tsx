@@ -8,12 +8,12 @@ import {
   getBucketDetails,
   listBucketObjects,
   listBuckets,
-} from '../api/s3';
-import { useBucketDetails } from './useBuckets';
-import { useBucketObjects } from './useBucketObjects';
-import { useBuckets } from './useBuckets';
-import { useDeleteBucket } from './useDeleteBucket';
-import { useDeleteObject } from './useDeleteObject';
+} from '@/features/s3/api/s3';
+import { useBucketDetails } from '@/features/s3/hooks/useBuckets';
+import { useBucketObjects } from '@/features/s3/hooks/useBucketObjects';
+import { useBuckets } from '@/features/s3/hooks/useBuckets';
+import { useDeleteBucket } from '@/features/s3/hooks/useDeleteBucket';
+import { useDeleteObject } from '@/features/s3/hooks/useDeleteObject';
 
 const settingsMock = vi.hoisted(() => ({
   endpoint: 'http://localhost:4566',
@@ -32,7 +32,7 @@ vi.mock('@/features/settings/hooks/useSettings', () => ({
   }),
 }));
 
-vi.mock('../api/s3', () => ({
+vi.mock('@/features/s3/api/s3', () => ({
   deleteBucket: vi.fn(),
   deleteObject: vi.fn(),
   getBucketDetails: vi.fn(),

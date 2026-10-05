@@ -61,7 +61,10 @@ services:
     ports:
       - "4566:4566"
     environment:
-      EXTRA_CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,https://robertosdn.github.io"
+      - EXTRA_CORS_ALLOWED_ORIGINS=*
+      - CORS_ALLOWED_ORIGINS=*
+      - CORS_ALLOWED_HEADERS=*
+      - CORS_ALLOWED_METHODS=*
 ```
 
 Save this as a Compose file (for example, `docker-compose.localstack.yml`) and
