@@ -4,6 +4,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { S3Client } from '@aws-sdk/client-s3';
 import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
+import { SchedulerClient } from '@aws-sdk/client-scheduler';
 
 export type AwsClientConfig = {
   endpoint?: string;
@@ -130,6 +131,23 @@ export function createEventBridgeClient(config: AwsClientConfig = {}) {
   } = config;
 
   return new EventBridgeClient({
+    region,
+    endpoint,
+    credentials,
+  });
+}
+
+export function createSchedulerClient(config: AwsClientConfig = {}) {
+  const {
+    endpoint = 'http://localhost:4566',
+    region = 'us-east-1',
+    credentials = {
+      accessKeyId: 'test',
+      secretAccessKey: 'test',
+    },
+  } = config;
+
+  return new SchedulerClient({
     region,
     endpoint,
     credentials,
