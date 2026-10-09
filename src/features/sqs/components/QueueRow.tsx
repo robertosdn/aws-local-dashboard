@@ -3,17 +3,19 @@
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eraser, Eye } from 'lucide-react';
+import { Eraser, Eye, Info, Send } from 'lucide-react';
 
 import type { SQSQueue } from '../types/sqs';
 
 interface QueueRowProps {
   queue: SQSQueue;
+  onViewDetails: (queue: SQSQueue) => void;
   onViewMessages: (queue: SQSQueue) => void;
+  onSendMessage: (queue: SQSQueue) => void;
   onPurge: (queue: SQSQueue) => void;
 }
 
-export function QueueRow({ queue, onViewMessages, onPurge }: QueueRowProps) {
+export function QueueRow({ queue, onViewDetails, onViewMessages, onSendMessage, onPurge }: QueueRowProps) {
   const { attributes } = queue;
   const visibleCount = parseInt(attributes.ApproximateNumberOfMessages || '0', 10);
   const inFlightCount = parseInt(attributes.ApproximateNumberOfMessagesNotVisible || '0', 10);
@@ -54,11 +56,29 @@ export function QueueRow({ queue, onViewMessages, onPurge }: QueueRowProps) {
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => onViewDetails(queue)}
+            aria-label={`View details for ${queue.name}`}
+            title="View queue details"
+          >
+            <Info className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => onViewMessages(queue)}
             aria-label={`View messages for ${queue.name}`}
             title="View messages"
           >
             <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onSendMessage(queue)}
+            aria-label={`Send message to ${queue.name}`}
+            title="Send message"
+          >
+            <Send className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"

@@ -3,12 +3,20 @@ import {
   ListQueuesCommand,
   GetQueueAttributesCommand,
   ReceiveMessageCommand,
+  SendMessageCommand,
   PurgeQueueCommand,
   type QueueAttributeName,
 } from '@aws-sdk/client-sqs';
 
 import { createSqsClient, type AwsClientConfig } from '@/services/aws';
-import type { SQSQueue, SQSMessage, PurgeQueueResult } from '../types/sqs';
+import type {
+  SQSQueue,
+  SQSMessage,
+  PurgeQueueResult,
+  SendMessageOptions,
+  SendMessageResult,
+  SQSQueueDetails,
+} from '../types/sqs';
 
 const QUEUE_ATTRIBUTES: QueueAttributeName[] = [
   'All',
@@ -94,6 +102,67 @@ export async function receiveMessages(
       attributes: msg.Attributes || {},
       messageAttributes: msg.MessageAttributes as SQSMessage['messageAttributes'],
     }));
+  } finally {
+    client.destroy();
+  }
+}
+
+export async function getQueueDetails(
+  queueUrl: string,
+  config?: AwsClientConfig,
+): Promise<SQSQueueDetails> {
+  const client = createSqsClient(config);
+
+  try {
+    const command = new GetQueueAttributesCommand({
+      QueueUrl: queueUrl,
+      AttributeNames: QUEUE_ATTRIBUTES,
+    });
+
+    const response = await client.send(command);
+
+    return {
+      url: queueUrl,
+      name: extractQueueName(queueUrl),
+      attributes: response.Attributes || {},
+    };
+  } finally {
+    client.destroy();
+  }
+}
+
+export async function sendMessage(
+  queueUrl: string,
+  body: string,
+  config?: AwsClientConfig,
+  options: SendMessageOptions = {},
+): Promise<SendMessageResult> {
+  const client = createSqsClient(config);
+
+  try {
+    const messageAttributes = options.messageAttributes
+      ? Object.fromEntries(
+          Object.entries(options.messageAttributes).map(([name, value]) => [
+            name,
+            { DataType: value.dataType, StringValue: value.stringValue },
+          ]),
+        )
+      : undefined;
+
+    const command = new SendMessageCommand({
+      QueueUrl: queueUrl,
+      MessageBody: body,
+      MessageAttributes: messageAttributes,
+      DelaySeconds: options.delaySeconds,
+    });
+
+    const response = await client.send(command);
+
+    return {
+      messageId: response.MessageId || '',
+      md5OfMessageBody: response.MD5OfMessageBody,
+      md5OfMessageAttributes: response.MD5OfMessageAttributes,
+    };
   } finally {
     client.destroy();
   }

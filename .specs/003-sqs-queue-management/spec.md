@@ -3,6 +3,7 @@
 ## Architecture
 
 ### Components
+
 ```
 src/
 ├── features/sqs/
@@ -31,6 +32,7 @@ src/
 ## Data Structures
 
 ### Queue (from ListQueues + GetQueueAttributes)
+
 ```typescript
 interface SQSQueue {
   url: string;
@@ -49,6 +51,7 @@ interface SQSQueue {
 ```
 
 ### Message (from ReceiveMessage)
+
 ```typescript
 interface SQSMessage {
   messageId: string;
@@ -60,7 +63,10 @@ interface SQSMessage {
     SenderId?: string;
     ApproximateFirstReceiveTimestamp?: string;
   };
-  messageAttributes?: Record<string, { dataType: string; stringValue?: string; binaryValue?: Blob }>;
+  messageAttributes?: Record<
+    string,
+    { dataType: string; stringValue?: string; binaryValue?: Blob }
+  >;
 }
 ```
 
@@ -97,7 +103,13 @@ async function purgeQueue(queueUrl: string): Promise<void> {
 
 ```typescript
 // Use @aws-sdk/client-sqs with custom endpoint
-import { SQSClient, ListQueuesCommand, GetQueueAttributesCommand, ReceiveMessageCommand, PurgeQueueCommand } from '@aws-sdk/client-sqs';
+import {
+  SQSClient,
+  ListQueuesCommand,
+  GetQueueAttributesCommand,
+  ReceiveMessageCommand,
+  PurgeQueueCommand,
+} from '@aws-sdk/client-sqs';
 
 const client = new SQSClient({
   region: REGION,
@@ -112,62 +124,77 @@ const client = new SQSClient({
 ## State Management
 
 ### useQueues Hook
+
 - `queues: SQSQueue[]`
 - `loading: boolean`
 - `error: Error | null`
 - `refetch(): Promise<void>`
 
 ### useQueueMessages Hook
+
 - `messages: SQSMessage[]`
 - `loading: boolean`
 - `error: Error | null`
 - `fetch(queueUrl: string): Promise<void>`
 
 ### usePurgeQueue Hook
+
 - `mutate(queueUrl: string): Promise<void>`
 - `pending: boolean`
 
 ## UI/UX Details
 
+### Page Title
+
+- Show `Queues` as the main page title for the SQS queue collection.
+- Keep `SQS` as the service/category label; do not title the page `aws local SQS`.
+
 ### Queue Table Columns
-| Column | Source | Notes |
-|--------|--------|-------|
-| Name | Queue URL parsing | Last segment after final `/` |
-| URL | Queue.url | Truncated with tooltip |
-| Messages | ApproximateNumberOfMessages | Visible count |
-| In Flight | ApproximateNumberOfMessagesNotVisible | Processing |
-| Delayed | ApproximateNumberOfMessagesDelayed | Scheduled |
-| Actions | - | View Messages, Purge (cleaning brush icon); no AWS console link |
+
+| Column    | Source                                | Notes                                                           |
+| --------- | ------------------------------------- | --------------------------------------------------------------- |
+| Name      | Queue URL parsing                     | Last segment after final `/`                                    |
+| URL       | Queue.url                             | Truncated with tooltip                                          |
+| Messages  | ApproximateNumberOfMessages           | Visible count                                                   |
+| In Flight | ApproximateNumberOfMessagesNotVisible | Processing                                                      |
+| Delayed   | ApproximateNumberOfMessagesDelayed    | Scheduled                                                       |
+| Actions   | -                                     | View Messages, Purge (cleaning brush icon); no AWS console link |
 
 ### Queue Row Actions
+
 - Provide actions to view messages and purge the queue
 - Use a cleaning/brush icon for the purge action instead of a trash icon
 - Do not provide an "Open in AWS console" link
 
 ### Message Viewer
+
 - Modal overlay (preferred) or separate route `/sqs/:queueName/messages`
 - Table: Message ID | Body (JSON formatted) | Attributes | Receive Count
 - Pagination: Previous/Next (10 per page)
 - Close button returns to queue list
 
 ### Purge Confirmation
-- shadcn/ui AlertDialog
+
+- Project-owned confirmation dialog following established accessible dialog patterns (shadcn/ui may be consulted as a reference)
 - Title: "Purge Queue"
 - Description: "This will permanently delete all messages in [queue name]. This action cannot be undone."
 - Buttons: Cancel, Purge (destructive variant)
 
 ## Routing
+
 ```
 /sqs                    -> SQSQueuesPage (list)
 /sqs/:queueName/messages -> MessageViewer (optional, modal preferred)
 ```
 
 ## Error Handling
+
 - Network errors: Toast "Failed to connect to localhost:4566"
 - AWS errors: Display error code + message from response
 - Empty states: "No queues found" / "No messages in queue"
 
 ## Security
+
 - No credentials in code - uses dummy credentials for local emulator
 - Endpoint configurable via VITE_AWS_ENDPOINT env var
 - All requests go to configured endpoint only

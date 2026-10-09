@@ -4,7 +4,10 @@ import QueuesPage from '@/pages/QueuesPage';
 import SettingsPage from '@/pages/SettingsPage';
 import S3Page from '@/pages/S3Page';
 import LambdaPage from '@/pages/LambdaPage';
+import LambdaDetailPage from '@/pages/LambdaDetailPage';
 import DynamoDbPage from '@/pages/DynamoDbPage';
+import EventBusesPage from '@/pages/EventBusesPage';
+import EventBusDetailPage from '@/pages/EventBusDetailPage';
 
 export type AppRoute = {
   path: string;
@@ -34,9 +37,24 @@ export const routes: AppRoute[] = [
     element: createElement(LambdaPage),
   },
   {
+    path: '/lambda/:functionName',
+    label: 'Lambda Detail',
+    element: createElement(LambdaDetailPage),
+  },
+  {
     path: '/dynamodb',
     label: 'DynamoDB',
     element: createElement(DynamoDbPage),
+  },
+  {
+    path: '/eventbridge/eventbuses',
+    label: 'Event Buses',
+    element: createElement(EventBusesPage),
+  },
+  {
+    path: '/eventbridge/eventbuses/:name',
+    label: 'Event Bus Detail',
+    element: createElement(EventBusDetailPage),
   },
   {
     path: '/settings',

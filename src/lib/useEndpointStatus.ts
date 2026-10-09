@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 
 const DEFAULT_ENDPOINT = 'http://localhost:4566';
+export const ENDPOINT_STATUS_POLL_INTERVAL_MS = 30_000;
 
-export function useEndpointStatus(endpoint = DEFAULT_ENDPOINT, intervalMs = 5000) {
+export function useEndpointStatus(
+  endpoint = DEFAULT_ENDPOINT,
+  intervalMs = ENDPOINT_STATUS_POLL_INTERVAL_MS,
+) {
   const [isOnline, setIsOnline] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
