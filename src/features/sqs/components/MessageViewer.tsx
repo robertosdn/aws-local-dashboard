@@ -32,8 +32,8 @@ export function MessageViewer({ open, onOpenChange, queue, onPurge, purgePending
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[85vh]">
-        <DialogHeader className="flex flex-row items-center justify-between">
+      <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
+        <DialogHeader className="flex flex-row items-center justify-between flex-shrink-0">
           <div>
             <DialogTitle>{queue.name}</DialogTitle>
             <DialogDescription>Peek mode - messages remain in queue</DialogDescription>
@@ -45,7 +45,7 @@ export function MessageViewer({ open, onOpenChange, queue, onPurge, purgePending
             </Button>
           </div>
         </DialogHeader>
-        <div className="mt-4">
+        <div className="mt-4 flex-1 overflow-y-auto">
           <MessageList
             messages={messages}
             loading={loading}

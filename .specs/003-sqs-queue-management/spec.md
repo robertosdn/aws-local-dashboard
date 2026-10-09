@@ -172,6 +172,7 @@ const client = new SQSClient({
 - Table: Message ID | Body (JSON formatted) | Attributes | Receive Count
 - Pagination: Previous/Next (10 per page)
 - Close button returns to queue list
+- **Scrollable message list**: Dialog content uses `max-h-[85vh]` with flex layout; header is fixed (`flex-shrink-0`), message table area scrolls independently (`flex-1 overflow-y-auto`) so long message lists don't overflow the dialog
 
 ### Purge Confirmation
 
