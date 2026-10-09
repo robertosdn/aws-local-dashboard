@@ -30,11 +30,9 @@ export const navigation: NavigationItem[] = [
     icon: Zap,
   },
   {
-    path: '/eventbridge/scheduler',
+    path: '/eventbridge/scheduler/groups',
     label: 'EventBridge (Scheduler)',
     icon: Clock3,
-    comingSoon: true,
-    disabled: true,
   },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];

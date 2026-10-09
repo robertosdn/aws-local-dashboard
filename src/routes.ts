@@ -8,6 +8,10 @@ import LambdaDetailPage from '@/pages/LambdaDetailPage';
 import DynamoDbPage from '@/pages/DynamoDbPage';
 import EventBusesPage from '@/pages/EventBusesPage';
 import EventBusDetailPage from '@/pages/EventBusDetailPage';
+import SchedulerGroupsPage from '@/pages/SchedulerGroupsPage';
+import SchedulerGroupDetailPage from '@/pages/SchedulerGroupDetailPage';
+import SchedulerSchedulesPage from '@/pages/SchedulerSchedulesPage';
+import SchedulerScheduleDetailPage from '@/pages/SchedulerScheduleDetailPage';
 
 export type AppRoute = {
   path: string;
@@ -55,6 +59,26 @@ export const routes: AppRoute[] = [
     path: '/eventbridge/eventbuses/:name',
     label: 'Event Bus Detail',
     element: createElement(EventBusDetailPage),
+  },
+  {
+    path: '/eventbridge/scheduler/groups',
+    label: 'Schedule Groups',
+    element: createElement(SchedulerGroupsPage),
+  },
+  {
+    path: '/eventbridge/scheduler/groups/:groupName',
+    label: 'Schedule Group Detail',
+    element: createElement(SchedulerGroupDetailPage),
+  },
+  {
+    path: '/eventbridge/scheduler/groups/:groupName/schedules',
+    label: 'Schedules',
+    element: createElement(SchedulerSchedulesPage),
+  },
+  {
+    path: '/eventbridge/scheduler/groups/:groupName/schedules/:scheduleName',
+    label: 'Schedule Detail',
+    element: createElement(SchedulerScheduleDetailPage),
   },
   {
     path: '/settings',

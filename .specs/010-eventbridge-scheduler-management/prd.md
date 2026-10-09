@@ -1,66 +1,85 @@
 # Product Requirements Document: EventBridge Scheduler Management
 
 ## Overview
-Enable users to view and manage Amazon EventBridge Scheduler schedule groups and schedules in the local AWS dashboard. Users can list all schedule groups, view schedules within each group, and see detailed information.
+
+Enable users to inspect Amazon EventBridge Scheduler schedule groups and the
+schedules they contain in the local AWS dashboard. Users can browse schedule
+groups, open a group to see its schedules, and review an individual schedule's
+configuration and target. This iteration is read-only.
+
+## Scope
+
+Read-only inspection of schedule groups and schedules. Creating, editing,
+deleting, enabling, disabling, or manually running schedules is not part of this
+iteration.
 
 ## User Stories
 
-### US-001: List Schedule Groups
+### US-001: List schedule groups
+
 As a developer using local AWS services
-I want to see a list of all EventBridge Scheduler schedule groups
-So that I can organize and navigate schedules by group
+I want to see the schedule groups available on the configured endpoint
+So that I can find and navigate the group that holds my schedules
 
 **Acceptance Criteria:**
-- Display a table/list of all schedule groups with name, ARN, and creation date
-- Show schedule count per group
-- Support pagination for large numbers of schedule groups
-- Show loading state while fetching data
-- Handle empty state (no schedule groups)
-- Refresh button to reload the list
+- The page lists schedule groups with name, ARN, and creation date
+- A `View` action opens the schedule group details
+- A `Schedules` action opens the schedules contained in the group
+- Loading and empty states are shown, and the list can be refreshed
+- Additional pages can be loaded when more schedule groups exist
+- A failed request shows an error state with a retry action, distinct from an empty list
 
-### US-002: View Schedule Group Details
+### US-002: View schedule group details
+
 As a developer using local AWS services
-I want to view all schedules within a specific schedule group
-So that I can manage and monitor scheduled tasks
+I want to review a schedule group's metadata
+So that I can confirm which group I am working with
 
 **Acceptance Criteria:**
-- Navigate to detail view by clicking on a schedule group in the list
-- Display schedule group metadata: name, ARN, creation date
-- List all schedules in the group with: name, schedule expression, target, state, next invocation
-- Support filtering by schedule state (enabled/disabled)
-- Back navigation to list view
+- Display schedule group name, ARN, creation date, and last modification date
+- Provide navigation back to the schedule group list
+- Provide a way to continue to the schedules contained in the group
 
-### US-003: View Schedule Details
+### US-003: View schedules in a group
+
 As a developer using local AWS services
-I want to view detailed information about a specific schedule
-So that I can understand its configuration and target
+I want to see the schedules inside a schedule group
+So that I can monitor the scheduled tasks it defines
 
 **Acceptance Criteria:**
-- Navigate to schedule detail from schedule group view
-- Display schedule metadata: name, ARN, description, schedule expression, timezone
-- Show target configuration: ARN, role ARN, input, retry policy, dead letter queue
-- Display state (enabled/disabled) and last/next invocation times
-- Back navigation to schedule group view
+- List the group's schedules with name, state (enabled/disabled), target ARN, and last modification date
+- Support filtering the list by schedule state (all, enabled, disabled)
+- Provide navigation back to the schedule group detail
+- Loading and empty states are shown, and the list can be refreshed
+- Additional pages can be loaded when more schedules exist
 
-### US-004: Create Schedule Group (Future)
+### US-004: View schedule details
+
 As a developer using local AWS services
-I want to create new schedule groups
-So that I can organize schedules by application or environment
+I want to review a schedule's configuration and target
+So that I can understand what the schedule does
 
 **Acceptance Criteria:**
-- Button to create new schedule group
-- Form with name input and optional tags
-- Validation for naming rules
-- Success/error feedback
+- Display schedule metadata: name, ARN, group name, description (when present), schedule expression with timezone, state, start and end dates (when present), flexible time window, and action after completion
+- Display the target configuration: target ARN, role ARN, input payload (when present), retry policy, dead-letter queue, and target-specific parameters (when present)
+- Provide navigation back to the schedule group's schedule list
 
 ## Non-Functional Requirements
-- Page load time < 2 seconds for list views
-- Responsive design for desktop and tablet
-- Consistent with existing dashboard UI patterns
-- Accessible (WCAG 2.1 AA)
+
+- Consistent with the existing dashboard page structure, action buttons, and visual tokens
+- Accessible: keyboard navigation, accessible action labels, and visible focus states
+- Responsive layout for desktop and tablet
+- Clear loading, empty, and error feedback for every view
 
 ## Out of Scope
-- Creating/editing schedules (read-only for now)
-- Schedule execution history
+
+- Creating, editing, deleting, enabling, or disabling schedules or schedule groups
+- Invocation history or manual "run now" actions
 - Cross-account scheduling
-- Schedule tagging management
+- Schedule or schedule group tag management
+
+## Notes
+
+- Schedule **next** and **last** invocation times are not returned by the
+  EventBridge Scheduler API and are therefore not shown anywhere in the product.
+  The dashboard must not imply that this information is available.

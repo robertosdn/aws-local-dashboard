@@ -63,6 +63,7 @@ Resource list tables use consistent **icon buttons** with accessible labels. Ord
 | **DynamoDB Tables** | `Info` icon (keys, indexes, capacity, metadata) | `Table` icon (Query/Scan tabs) | `Trash2` icon (removes all items) |
 | **Lambda Functions** | `Info` icon (config, code, environment) | `Play` icon (Invoke/test execution) | N/A (not implemented) |
 | **EventBridge Event Buses** | `Info` icon (ARN, creation date, policy, rules) | N/A | `Trash2` icon (custom buses only) |
+| **EventBridge Scheduler Groups** | `Info` icon (name, ARN, creation and last modification dates) | `Table` icon (schedules in the group) | N/A (read-only) |
 
 SQS queue rows render their actions in the order **View → View Messages → Send Message → Purge**, each as an icon button with an accessible label that names the queue. The SQS `View` action opens a modal dialog with the queue attributes rather than a dedicated detail screen.
 

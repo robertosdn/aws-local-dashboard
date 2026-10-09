@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { navigation } from '@/config/navigation';
 
 describe('resource navigation', () => {
-  it('shows only EventBridge Scheduler as coming soon', () => {
+  it('shows no coming soon entries once every resource entry is implemented', () => {
     const comingSoonItems = navigation.filter((item) => item.comingSoon).map((item) => item.label);
 
-    expect(comingSoonItems).toEqual(['EventBridge (Scheduler)']);
+    expect(comingSoonItems).toEqual([]);
   });
 
   it('enables implemented DynamoDB and S3 resources', () => {
@@ -23,13 +23,15 @@ describe('resource navigation', () => {
     expect(s3Index).toBeGreaterThan(dynamoDbIndex);
   });
 
-  it('enables the EventBridge EventBus entry and keeps Scheduler coming soon', () => {
+  it('enables the EventBridge EventBus and Scheduler entries', () => {
     const eventBusItem = navigation.find((item) => item.label === 'EventBridge (EventBus)');
     const schedulerItem = navigation.find((item) => item.label === 'EventBridge (Scheduler)');
 
     expect(eventBusItem?.path).toBe('/eventbridge/eventbuses');
     expect(eventBusItem?.comingSoon).toBeFalsy();
     expect(eventBusItem?.disabled).toBeFalsy();
-    expect(schedulerItem).toMatchObject({ comingSoon: true, disabled: true });
+    expect(schedulerItem?.path).toBe('/eventbridge/scheduler/groups');
+    expect(schedulerItem?.comingSoon).toBeFalsy();
+    expect(schedulerItem?.disabled).toBeFalsy();
   });
 });
