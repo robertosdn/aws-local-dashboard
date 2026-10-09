@@ -76,8 +76,9 @@ interface ScheduleGroupSummary {
   lastModifiedAt?: Date;
 }
 
-// GetScheduleGroup returns the same fields as the list summary.
-type ScheduleGroupDetails = ScheduleGroupSummary;
+// GetScheduleGroup returns the same fields as the list summary. The type name is
+// singular to avoid colliding with the `ScheduleGroupDetails` component.
+type ScheduleGroupDetail = ScheduleGroupSummary;
 
 interface ScheduleGroupPage {
   scheduleGroups: ScheduleGroupSummary[];
@@ -154,7 +155,7 @@ instead of fetching every page automatically. Do not auto-paginate.
 | Operation | AWS SDK command | Input | Output | Behavior |
 | --- | --- | --- | --- | --- |
 | `listScheduleGroups` | `ListScheduleGroupsCommand` | optional `NextToken`, `MaxResults: 100` | `ScheduleGroupPage` | Return one bounded page of schedule groups |
-| `getScheduleGroupDetails` | `GetScheduleGroupCommand` | `Name` | `ScheduleGroupDetails` | Map name, ARN, creation and last modification dates; surface not-found and service errors |
+| `getScheduleGroupDetails` | `GetScheduleGroupCommand` | `Name` | `ScheduleGroupDetail` | Map name, ARN, creation and last modification dates; surface not-found and service errors |
 | `listSchedules` | `ListSchedulesCommand` | `GroupName`, optional `State`, optional `NextToken`, `MaxResults: 100` | `SchedulePage` | Return one bounded page of schedules, optionally filtered by state |
 | `getScheduleDetails` | `GetScheduleCommand` | `Name`, `GroupName` | `ScheduleDetails` | Map metadata, expression, flexible time window, and target configuration |
 
@@ -180,7 +181,7 @@ instead of fetching every page automatically. Do not auto-paginate.
 
 ### Schedules within a group
 
-- Query key: `['scheduler', 'schedules', endpoint, region, groupName, state, nextToken]`.
+- Query key: `['scheduler', 'schedules', endpoint, region, groupName, state ?? 'all', nextToken]`.
 - The `state` filter (`all` → omit, or `ENABLED`/`DISABLED`) is part of the key so
   filtering re-uses the bounded server-side query.
 
@@ -271,7 +272,9 @@ its `comingSoon`/`disabled` flags; do not add a second navigation entry.
   error states.
 - Missing schedule group or schedule on a detail route: show a not-found state with
   a link back to the parent list instead of crashing.
-- Request failures: toast notification plus retry.
+- Request failures: inline error state with a retry action on every list and
+  detail view, consistent with the existing EventBridge EventBus pages. No success
+  toast is used because the feature is read-only.
 - Do not convert exceptions into empty arrays or success-shaped results.
 
 ## Security and Configuration
@@ -306,5 +309,5 @@ its `comingSoon`/`disabled` flags; do not add a second navigation entry.
 
 ## Dependencies
 
-- Add `@aws-sdk/client-scheduler` (not currently installed).
-- Reuse existing React Query, settings, toast, and project UI dependencies.
+- `@aws-sdk/client-scheduler` (installed) for the Scheduler API.
+- Reuse the existing React Query, settings, and project UI dependencies.

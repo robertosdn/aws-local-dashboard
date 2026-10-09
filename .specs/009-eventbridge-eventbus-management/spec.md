@@ -180,7 +180,7 @@ Reuse project-owned dialog, button, table, badge, and notification primitives. E
 | `/eventbridge/eventbuses` | `EventBusesPage` (list) | list pagination state |
 | `/eventbridge/eventbuses/:name` | `EventBusDetailPage` (detail) | `name` |
 
-Register routes in `src/routes.ts` following the existing Lambda detail pattern. Update the sidebar entry in `src/config/navigation.ts` to point to `/eventbridge/eventbuses` and remove the `comingSoon`/`disabled` flags for EventBridge EventBus. Keep the EventBridge Scheduler entry as coming soon.
+Register routes in `src/routes.ts` following the existing Lambda detail pattern. Update the sidebar entry in `src/config/navigation.ts` to point to `/eventbridge/eventbuses` and remove the `comingSoon`/`disabled` flags for EventBridge EventBus. Leave the EventBridge Scheduler entry for [feature 010](../010-eventbridge-scheduler-management/spec.md), which enables it.
 
 ## Error Handling
 
