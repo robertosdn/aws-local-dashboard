@@ -11,6 +11,8 @@ import {
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { Info, Table as TableIcon, Trash2 } from 'lucide-react';
 import type { DynamoTableSummary } from '../types/dynamodb';
 
 interface TableListProps {
@@ -126,29 +128,34 @@ export function TableList({
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-end gap-2">
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => onViewTable(table.tableName)}
-                      aria-label={`View ${table.tableName}`}
-                      className="rounded border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-white transition-colors hover:bg-slate-700"
+                      aria-label={`View details for ${table.tableName}`}
+                      title="View table details"
                     >
-                      View
-                    </button>
-                    <button
-                      type="button"
+                      <Info className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => onViewItems(table.tableName)}
                       aria-label={`View items in ${table.tableName}`}
-                      className="rounded border border-cyan-500/30 bg-cyan-500/20 px-3 py-1.5 text-sm text-cyan-400 transition-colors hover:bg-cyan-500/30"
+                      title="View items"
                     >
-                      Items
-                    </button>
-                    <button
-                      type="button"
+                      <TableIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => onDeleteTable(table.tableName)}
-                      className="rounded border border-red-500/30 bg-red-500/20 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/30"
+                      aria-label={`Delete table ${table.tableName}`}
+                      title="Delete table"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                     >
-                      Delete
-                    </button>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>

@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useQueues, usePurgeQueue, useInvalidateQueues } from '@/features/sqs/hooks';
+import { useQueues, usePurgeQueue, useSendMessage, useInvalidateQueues } from '@/features/sqs/hooks';
 import { QueueTable } from '@/features/sqs/components/QueueTable';
 import { MessageViewer } from '@/features/sqs/components/MessageViewer';
 import { PurgeConfirmDialog } from '@/features/sqs/components/PurgeConfirmDialog';
+import { SendMessageDialog, type SendMessagePayload } from '@/features/sqs/components/SendMessageDialog';
+import { QueueDetailsDialog } from '@/features/sqs/components/QueueDetailsDialog';
 import { RefreshButton } from '@/features/sqs/components/RefreshButton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -13,16 +15,49 @@ import type { SQSQueue } from '@/features/sqs/types/sqs';
 export default function QueuesPage() {
   const { queues, loading, error, refetch } = useQueues();
   const { purge, pending: purgePending } = usePurgeQueue();
+  const { send, pending: sendPending } = useSendMessage();
   const invalidateQueues = useInvalidateQueues();
 
   const [selectedQueue, setSelectedQueue] = useState<SQSQueue | null>(null);
   const [messageViewerOpen, setMessageViewerOpen] = useState(false);
   const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
   const [queueToPurge, setQueueToPurge] = useState<SQSQueue | null>(null);
+  const [sendDialogOpen, setSendDialogOpen] = useState(false);
+  const [queueForSend, setQueueForSend] = useState<SQSQueue | null>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [queueForDetails, setQueueForDetails] = useState<SQSQueue | null>(null);
 
   const handleViewMessages = (queue: SQSQueue) => {
     setSelectedQueue(queue);
     setMessageViewerOpen(true);
+  };
+
+  const handleViewDetails = (queue: SQSQueue) => {
+    setQueueForDetails(queue);
+    setDetailsDialogOpen(true);
+  };
+
+  const handleSendClick = (queue: SQSQueue) => {
+    setQueueForSend(queue);
+    setSendDialogOpen(true);
+  };
+
+  const handleSend = async (payload: SendMessagePayload) => {
+    try {
+      const result = await send(payload);
+      toast({
+        title: 'Message sent',
+        description: `Message ID: ${result.messageId}`,
+        variant: 'success',
+      });
+    } catch (err) {
+      toast({
+        title: 'Failed to send message',
+        description: err instanceof Error ? err.message : 'Unknown error',
+        variant: 'destructive',
+      });
+      throw err;
+    }
   };
 
   const handlePurgeClick = (queue: SQSQueue) => {
@@ -95,8 +130,24 @@ export default function QueuesPage() {
       <QueueTable
         queues={queues}
         loading={loading}
+        onViewDetails={handleViewDetails}
         onViewMessages={handleViewMessages}
+        onSendMessage={handleSendClick}
         onPurge={handlePurgeClick}
+      />
+
+      <QueueDetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        queue={queueForDetails}
+      />
+
+      <SendMessageDialog
+        open={sendDialogOpen}
+        onOpenChange={setSendDialogOpen}
+        queue={queueForSend}
+        onSend={handleSend}
+        pending={sendPending}
       />
 
       <MessageViewer

@@ -29,7 +29,7 @@ describe('DynamoDB components', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'View sample-table' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View details for sample-table' }));
     fireEvent.click(screen.getByRole('button', { name: 'View items in sample-table' }));
     fireEvent.click(screen.getByRole('button', { name: 'Load More Tables' }));
 

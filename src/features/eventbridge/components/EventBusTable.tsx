@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Info, Trash2 } from 'lucide-react';
 import type { EventBusSummary } from '../types/eventbridge';
 import { DEFAULT_EVENT_BUS_NAME } from '../types/eventbridge';
 
@@ -75,21 +76,24 @@ export function EventBusTable({
                   <TableCell>
                     <div className="flex justify-end gap-2">
                       <Button
-                        variant="secondary"
-                        size="sm"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => onViewEventBus(eventBus.name)}
-                        aria-label={`View event bus ${eventBus.name}`}
+                        aria-label={`View details for ${eventBus.name}`}
+                        title="View details"
                       >
-                        View
+                        <Info className="h-4 w-4" />
                       </Button>
                       {isDefault ? null : (
                         <Button
-                          variant="destructive"
-                          size="sm"
+                          variant="ghost"
+                          size="icon"
                           onClick={() => onDeleteEventBus(eventBus.name)}
                           aria-label={`Delete event bus ${eventBus.name}`}
+                          title="Delete event bus"
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                         >
-                          Delete
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
                     </div>

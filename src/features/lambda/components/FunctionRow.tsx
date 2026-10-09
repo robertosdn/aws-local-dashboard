@@ -3,7 +3,7 @@
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Eye, Copy } from 'lucide-react';
+import { Play, Info, Copy } from 'lucide-react';
 
 import type { LambdaFunction } from '../types/lambda';
 
@@ -67,7 +67,7 @@ export function FunctionRow({ function: fn, onInvoke, onViewDetails }: FunctionR
             aria-label={`View details for ${fn.functionName}`}
             title="View details"
           >
-            <Eye className="h-4 w-4" />
+            <Info className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"

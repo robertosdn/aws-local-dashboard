@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const hooks = vi.hoisted(() => ({
   useQueues: vi.fn(),
   usePurgeQueue: vi.fn(),
+  useSendMessage: vi.fn(),
   useInvalidateQueues: vi.fn(),
   useTables: vi.fn(),
   useInvalidateTables: vi.fn(),
@@ -18,11 +19,16 @@ const hooks = vi.hoisted(() => ({
 vi.mock('@/features/sqs/hooks', () => ({
   useQueues: hooks.useQueues,
   usePurgeQueue: hooks.usePurgeQueue,
+  useSendMessage: hooks.useSendMessage,
   useInvalidateQueues: hooks.useInvalidateQueues,
 }));
 
 vi.mock('@/features/sqs/components/MessageViewer', () => ({
   MessageViewer: () => null,
+}));
+
+vi.mock('@/features/sqs/components/QueueDetailsDialog', () => ({
+  QueueDetailsDialog: () => null,
 }));
 
 vi.mock('@/features/sqs/components/PurgeConfirmDialog', () => ({
@@ -53,6 +59,7 @@ describe('resource page titles', () => {
       refetch: vi.fn(),
     });
     hooks.usePurgeQueue.mockReturnValue({ purge: vi.fn(), pending: false });
+    hooks.useSendMessage.mockReturnValue({ send: vi.fn(), pending: false });
     hooks.useInvalidateQueues.mockReturnValue(vi.fn());
 
     render(<QueuesPage />);

@@ -16,11 +16,13 @@ import type { SQSQueue } from '../types/sqs';
 interface QueueTableProps {
   queues: SQSQueue[];
   loading: boolean;
+  onViewDetails: (queue: SQSQueue) => void;
   onViewMessages: (queue: SQSQueue) => void;
+  onSendMessage: (queue: SQSQueue) => void;
   onPurge: (queue: SQSQueue) => void;
 }
 
-export function QueueTable({ queues, loading, onViewMessages, onPurge }: QueueTableProps) {
+export function QueueTable({ queues, loading, onViewDetails, onViewMessages, onSendMessage, onPurge }: QueueTableProps) {
   if (loading) {
     return (
       <Card className="overflow-hidden bg-slate-900/50">
@@ -32,7 +34,7 @@ export function QueueTable({ queues, loading, onViewMessages, onPurge }: QueueTa
               <TableHead className="text-right">Messages</TableHead>
               <TableHead className="text-right">In Flight</TableHead>
               <TableHead className="text-right">Delayed</TableHead>
-              <TableHead className="w-32">Actions</TableHead>
+              <TableHead className="w-48">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -85,7 +87,7 @@ export function QueueTable({ queues, loading, onViewMessages, onPurge }: QueueTa
             <TableHead className="text-right">Messages</TableHead>
             <TableHead className="text-right">In Flight</TableHead>
             <TableHead className="text-right">Delayed</TableHead>
-            <TableHead className="w-32">Actions</TableHead>
+            <TableHead className="w-48">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -93,7 +95,9 @@ export function QueueTable({ queues, loading, onViewMessages, onPurge }: QueueTa
             <QueueRow
               key={queue.url}
               queue={queue}
+              onViewDetails={onViewDetails}
               onViewMessages={onViewMessages}
+              onSendMessage={onSendMessage}
               onPurge={onPurge}
             />
           ))}

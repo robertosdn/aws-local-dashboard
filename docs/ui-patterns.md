@@ -45,45 +45,73 @@ Same structure, but with error styling:
 
 ## Action Button Conventions
 
-Resource list tables use consistent action buttons. Order: **View → [Items/Open] → Delete**
+Resource list tables use consistent **icon buttons** with accessible labels. Order: **View → [Items/Open] → Delete**
 
-| Button | Label | Purpose | Variant |
-|--------|-------|---------|---------|
-| **View** | `View` | Show resource metadata/configuration (creation date, keys, encryption, versioning, etc.) | `secondary` / outline |
-| **Items** | `Items` | Navigate to the records/items inside the resource (DynamoDB tables → items) | `secondary` cyan |
-| **Open** | `Open` | Browse contents of container-like resources (S3 buckets → objects) | `secondary` |
-| **Delete** | `Delete` | Permanently remove the resource | `destructive` |
+| Button | Icon | Purpose | Variant |
+|--------|------|---------|---------|
+| **View** | `Info` | Show resource metadata/configuration (creation date, keys, encryption, versioning, etc.) | `ghost` / `icon` size |
+| **Items** | `Table` (DynamoDB) | Navigate to the records/items inside the resource | `ghost` / `icon` size |
+| **Open** | `FolderOpen` (S3) | Browse contents of container-like resources | `ghost` / `icon` size |
+| **Delete** | `Trash2` | Permanently remove the resource | `ghost` / `icon` size + red styling |
 
 ### Per-Resource Mapping
 
 | Resource | View | Items/Open | Delete |
 |----------|------|------------|--------|
-| **SQS Queues** | N/A (no metadata) | `View Messages` → modal | `Purge` (clear messages) |
-| **S3 Buckets** | `View` (config: region, versioning, encryption, public access) | `Open` (browse objects) | `Delete` (bucket must be empty) |
-| **DynamoDB Tables** | `Details` (keys, indexes, capacity, metadata) | `Items` (Query/Scan tabs) | `Delete` (removes all items) |
-| **Lambda Functions** | `View` (config, code, environment) | `Invoke` (test execution) | N/A (not implemented) |
+| **SQS Queues** | `Info` icon (queue attributes: ARN, creation/modified timestamps, visibility, retention, delay, redrive, encryption) | `View Messages` (Eye icon) → modal, `Send Message` (Send icon) → dialog (queue pre-selected from the row) | `Purge` (Eraser icon, clears messages) |
+| **S3 Buckets** | `Info` icon (config: region, versioning, encryption, public access) | `FolderOpen` icon (browse objects) | `Trash2` icon (bucket must be empty) |
+| **DynamoDB Tables** | `Info` icon (keys, indexes, capacity, metadata) | `Table` icon (Query/Scan tabs) | `Trash2` icon (removes all items) |
+| **Lambda Functions** | `Info` icon (config, code, environment) | `Play` icon (Invoke/test execution) | N/A (not implemented) |
+| **EventBridge Event Buses** | `Info` icon (ARN, creation date, policy, rules) | N/A | `Trash2` icon (custom buses only) |
+
+SQS queue rows render their actions in the order **View → View Messages → Send Message → Purge**, each as an icon button with an accessible label that names the queue. The SQS `View` action opens a modal dialog with the queue attributes rather than a dedicated detail screen.
 
 ### Button Implementation
 
 ```tsx
-// View - metadata/configuration
-<Button variant="secondary" size="sm" onClick={() => onViewResource(name)}>
-  View
+// View - metadata/configuration (icon button)
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={() => onViewResource(name)}
+  aria-label={`View details for ${name}`}
+  title="View details"
+>
+  <Info className="h-4 w-4" />
 </Button>
 
-// Items - records inside (DynamoDB)
-<Button variant="secondary" size="sm" onClick={() => onViewItems(name)} className="border-cyan-500/30 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30">
-  Items
+// Items - records inside (DynamoDB) (icon button)
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={() => onViewItems(name)}
+  aria-label={`View items in ${name}`}
+  title="View items"
+>
+  <Table className="h-4 w-4" />
 </Button>
 
-// Open - browse contents (S3)
-<Button variant="secondary" size="sm" onClick={() => onOpenResource(name)}>
-  Open
+// Open - browse contents (S3) (icon button)
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={() => onOpenResource(name)}
+  aria-label={`Open ${name}`}
+  title="Open"
+>
+  <FolderOpen className="h-4 w-4" />
 </Button>
 
-// Delete - destructive
-<Button variant="destructive" size="sm" onClick={() => onDeleteResource(name)}>
-  Delete
+// Delete - destructive (icon button with red styling)
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={() => onDeleteResource(name)}
+  aria-label={`Delete ${name}`}
+  title="Delete"
+  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+>
+  <Trash2 className="h-4 w-4" />
 </Button>
 ```
 

@@ -37,7 +37,7 @@ describe('EventBridge components', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'View event bus orders' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View details for orders' }));
     expect(onView).toHaveBeenCalledWith('orders');
 
     fireEvent.click(screen.getByRole('button', { name: 'Delete event bus orders' }));

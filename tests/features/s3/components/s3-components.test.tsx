@@ -31,7 +31,7 @@ describe('S3 components', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'View bucket sample-bucket' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View details for sample-bucket' }));
     expect(onView).toHaveBeenCalledWith('sample-bucket');
     fireEvent.click(screen.getByRole('button', { name: 'Open bucket sample-bucket' }));
     expect(onSelect).toHaveBeenCalledWith('sample-bucket');

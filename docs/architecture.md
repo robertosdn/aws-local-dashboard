@@ -4,7 +4,7 @@
 
 This project is a client-side AWS resource dashboard built with React, TypeScript, Vite, and React Router. It has no application backend: the browser sends requests directly to an AWS endpoint supplied by the user. The endpoint can be an AWS-compatible local service, such as the `ministackorg/ministack` container running on `localhost:4566`, or an appropriately configured AWS endpoint.
 
-The dashboard currently supports Amazon SQS queue inspection and operations, and AWS Lambda function inspection and invocation. The application is intended to make local development and testing possible without deploying an application server.
+The dashboard currently supports Amazon SQS queue inspection and operations (including sending messages), and AWS Lambda function inspection and invocation. The application is intended to make local development and testing possible without deploying an application server.
 
 ## Application Structure
 
@@ -164,7 +164,7 @@ graph TB
   - **AWS Client Factories** (`src/services/aws.ts`): `createSqsClient()` and `createLambdaClient()`, configured from shared endpoint and region settings
   - **API Layer Pattern** (`features/*/api/`): Consistent create-client → call → destroy pattern
   - **React Query Hooks Pattern** (`features/*/hooks/`): Standardized query keys, stale time, invalidation
-- **SQS Feature:** Implements the patterns for queue operations
+- **SQS Feature:** Implements the patterns for queue operations (list, view details, inspect, send, and purge messages)
 - **Lambda Feature:** Reuses base client factory, API pattern, hooks pattern, and component patterns from SQS
 - **Configuration:** Settings context provides shared endpoint/region to all services
 

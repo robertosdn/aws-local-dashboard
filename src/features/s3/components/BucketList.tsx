@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Info, FolderOpen, Trash2 } from 'lucide-react';
 import type { S3Bucket } from '../types/s3';
 
 interface BucketListProps {
@@ -58,28 +59,32 @@ export function BucketList({ buckets, loading, onSelectBucket, onViewBucket, onD
                 <TableCell>
                   <div className="flex justify-end gap-2">
                     <Button
-                      variant="secondary"
-                      size="sm"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => onViewBucket(bucket.name)}
-                      aria-label={`View bucket ${bucket.name}`}
+                      aria-label={`View details for ${bucket.name}`}
+                      title="View bucket details"
                     >
-                      View
+                      <Info className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="secondary"
-                      size="sm"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => onSelectBucket(bucket.name)}
                       aria-label={`Open bucket ${bucket.name}`}
+                      title="Open bucket"
                     >
-                      Open
+                      <FolderOpen className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="destructive"
-                      size="sm"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => onDeleteBucket(bucket.name)}
                       aria-label={`Delete bucket ${bucket.name}`}
+                      title="Delete bucket"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                     >
-                      Delete
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>
