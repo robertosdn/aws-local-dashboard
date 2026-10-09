@@ -2,7 +2,7 @@
 
 See `.specs/` for specification documents and templates.
 
-When asked to create a new feature, the agent should first ask clarifying questions to confirm design decisions before generating any documents. This includes questions about:
+When asked to create a new feature, the agent should first ask clarifying questions to confirm design decisions before generating any documents (Interractive step by step collaboration). This includes questions about:
 - Action buttons (View, Items, Open, Delete, etc.)
 - Pagination and data loading patterns
 - Detail view requirements

@@ -25,11 +25,9 @@ export const navigation: NavigationItem[] = [
   { path: '/dynamodb', label: 'DynamoDB', icon: Database },
   { path: '/s3', label: 'S3', icon: HardDrive },
   {
-    path: '/eventbridge/eventbus',
+    path: '/eventbridge/eventbuses',
     label: 'EventBridge (EventBus)',
     icon: Zap,
-    comingSoon: true,
-    disabled: true,
   },
   {
     path: '/eventbridge/scheduler',

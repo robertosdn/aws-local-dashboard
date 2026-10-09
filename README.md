@@ -13,6 +13,11 @@ A client-side AWS resource dashboard for local development. Connects directly to
   - Purge queues with confirmation dialog
   - Auto-refresh and manual refresh
 
+- **EventBridge EventBus Management**
+  - List event buses with ARN and creation date
+  - Inspect an event bus policy, its rules, and each rule's targets
+  - Delete custom event buses with confirmation (the `default` bus is protected)
+
 - **Local-First Architecture**
   - Runs entirely in the browser
   - Connects to local AWS emulator (ministack, LocalStack, etc.)
