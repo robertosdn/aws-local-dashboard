@@ -4,7 +4,6 @@ A client-side AWS resource dashboard for local development. Connects directly to
 
 **Live Demo:** https://robertosdn.github.io/aws-local-dashboard/
 
-
 ## Features
 
 - **SQS Queue Management**
@@ -16,6 +15,8 @@ A client-side AWS resource dashboard for local development. Connects directly to
 - **EventBridge EventBus Management**
   - List event buses with ARN and creation date
   - Inspect an event bus policy, its rules, and each rule's targets
+  - Create, edit, enable/disable, and delete rules with target management
+  - Validate EventBridge event patterns locally as JSON and against supported matching operators
   - Delete custom event buses with confirmation (the `default` bus is protected)
 
 - **EventBridge Scheduler Management**
@@ -57,7 +58,7 @@ services:
   ministack:
     image: ministackorg/ministack
     ports:
-      - "4566:4566"
+      - '4566:4566'
 ```
 
 To use LocalStack instead, start it on the same port and allow the dashboard's
@@ -69,7 +70,7 @@ services:
   localstack:
     image: localstack/localstack
     ports:
-      - "4566:4566"
+      - '4566:4566'
     environment:
       - EXTRA_CORS_ALLOWED_ORIGINS=*
       - CORS_ALLOWED_ORIGINS=*
@@ -140,14 +141,14 @@ src/
 The `scripts/` directory contains Node.js helpers that use the AWS CLI to
 provision and exercise local AWS test resources.
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Type-check + production build |
-| `npm run preview` | Preview production build |
-| `npm run lint` | Run ESLint |
+| Command             | Description                   |
+| ------------------- | ----------------------------- |
+| `npm run dev`       | Start development server      |
+| `npm run build`     | Type-check + production build |
+| `npm run preview`   | Preview production build      |
+| `npm run lint`      | Run ESLint                    |
 | `npm run typecheck` | Run TypeScript compiler check |
-| `npm run format` | Format with Prettier |
+| `npm run format`    | Format with Prettier          |
 
 ### Create a local SQS-to-Lambda example
 

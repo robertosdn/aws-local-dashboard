@@ -1,9 +1,15 @@
 import {
   DeleteEventBusCommand,
+  DeleteRuleCommand,
   DescribeEventBusCommand,
+  DisableRuleCommand,
+  EnableRuleCommand,
   ListEventBusesCommand,
   ListRulesCommand,
   ListTargetsByRuleCommand,
+  PutRuleCommand,
+  PutTargetsCommand,
+  RemoveTargetsCommand,
 } from '@aws-sdk/client-eventbridge';
 import { createEventBridgeClient, type AwsClientConfig } from '@/services/aws';
 import type {
@@ -13,6 +19,11 @@ import type {
   EventBusSummary,
   RulePage,
   RuleTarget,
+  RuleTargetInput,
+  SaveRuleInput,
+  SavedRule,
+  SetRuleStateInput,
+  DeleteRuleInput,
 } from '../types/eventbridge';
 import { DEFAULT_EVENT_BUS_NAME } from '../types/eventbridge';
 
@@ -60,6 +71,7 @@ function mapRule(rule: {
     roleArn: rule.RoleArn,
     managedBy: rule.ManagedBy,
     targets: [],
+    targetsLoaded: false,
   };
 }
 
@@ -150,13 +162,41 @@ export async function listRules(
         Limit: 100,
       }),
     );
-
-    const rules = (response.Rules ?? []).flatMap((rule) => {
-      const mapped = mapRule(rule);
-      return mapped ? [mapped] : [];
-    });
-
-    return { rules, nextToken: response.NextToken };
+    const busTargetsClient = createEventBridgeClient(config);
+    try {
+      const rules = await Promise.all(
+        (response.Rules ?? []).map(async (rule) => {
+          const mapped = mapRule(rule);
+          if (!mapped) return null;
+          let targetToken: string | undefined;
+          do {
+            const targets = await busTargetsClient.send(
+              new ListTargetsByRuleCommand({
+                EventBusName: eventBusName,
+                Rule: mapped.name,
+                Limit: 100,
+                NextToken: targetToken,
+              }),
+            );
+            mapped.targets.push(
+              ...(targets.Targets ?? []).flatMap((target) => {
+                const mappedTarget = mapTarget(target);
+                return mappedTarget ? [mappedTarget] : [];
+              }),
+            );
+            targetToken = targets.NextToken;
+          } while (targetToken);
+          mapped.targetsLoaded = true;
+          return mapped;
+        }),
+      );
+      return {
+        rules: rules.filter((rule): rule is EventBridgeRule => rule !== null),
+        nextToken: response.NextToken,
+      };
+    } finally {
+      busTargetsClient.destroy();
+    }
   } finally {
     client.destroy();
   }
@@ -170,18 +210,26 @@ export async function listTargetsByRule(
   const client = createEventBridgeClient(config);
 
   try {
-    const response = await client.send(
-      new ListTargetsByRuleCommand({
-        Rule: ruleName,
-        EventBusName: eventBusName,
-        Limit: 100,
-      }),
-    );
-
-    return (response.Targets ?? []).flatMap((target) => {
-      const mapped = mapTarget(target);
-      return mapped ? [mapped] : [];
-    });
+    let nextToken: string | undefined;
+    const targets: RuleTarget[] = [];
+    do {
+      const response = await client.send(
+        new ListTargetsByRuleCommand({
+          Rule: ruleName,
+          EventBusName: eventBusName,
+          Limit: 100,
+          NextToken: nextToken,
+        }),
+      );
+      targets.push(
+        ...(response.Targets ?? []).flatMap((target) => {
+          const mapped = mapTarget(target);
+          return mapped ? [mapped] : [];
+        }),
+      );
+      nextToken = response.NextToken;
+    } while (nextToken);
+    return targets;
   } finally {
     client.destroy();
   }
@@ -196,6 +244,164 @@ export async function deleteEventBus(name: string, config?: AwsClientConfig): Pr
 
   try {
     await client.send(new DeleteEventBusCommand({ Name: name }));
+  } finally {
+    client.destroy();
+  }
+}
+
+function toSdkTarget(target: RuleTargetInput) {
+  return {
+    Id: target.id,
+    Arn: target.arn,
+    RoleArn: target.roleArn,
+    Input: target.input,
+    InputPath: target.inputPath,
+  };
+}
+
+export async function putRule(
+  eventBusName: string,
+  values: SaveRuleInput['values'],
+  config?: AwsClientConfig,
+): Promise<SavedRule> {
+  const client = createEventBridgeClient(config);
+  try {
+    const response = await client.send(
+      new PutRuleCommand({
+        EventBusName: eventBusName,
+        Name: values.name,
+        Description: values.description,
+        EventPattern: values.eventPattern.trim() ? values.eventPattern : undefined,
+        State: values.state,
+      }),
+    );
+    return { name: values.name, arn: response.RuleArn };
+  } finally {
+    client.destroy();
+  }
+}
+
+export async function putTargets(
+  eventBusName: string,
+  ruleName: string,
+  targets: RuleTargetInput[],
+  config?: AwsClientConfig,
+): Promise<void> {
+  if (targets.length === 0) return;
+  const client = createEventBridgeClient(config);
+  try {
+    for (let offset = 0; offset < targets.length; offset += 10) {
+      const response = await client.send(
+        new PutTargetsCommand({
+          EventBusName: eventBusName,
+          Rule: ruleName,
+          Targets: targets.slice(offset, offset + 10).map(toSdkTarget),
+        }),
+      );
+      if ((response.FailedEntryCount ?? 0) > 0) {
+        const failures = (response.FailedEntries ?? []).map(
+          (entry) => entry.ErrorMessage ?? entry.ErrorCode ?? 'Unknown target error',
+        );
+        throw new Error(`Failed to save target(s): ${failures.join('; ')}`);
+      }
+    }
+  } finally {
+    client.destroy();
+  }
+}
+
+export async function removeTargets(
+  eventBusName: string,
+  ruleName: string,
+  targetIds: string[],
+  config?: AwsClientConfig,
+): Promise<void> {
+  if (targetIds.length === 0) return;
+  const client = createEventBridgeClient(config);
+  try {
+    for (let offset = 0; offset < targetIds.length; offset += 10) {
+      const response = await client.send(
+        new RemoveTargetsCommand({
+          EventBusName: eventBusName,
+          Rule: ruleName,
+          Ids: targetIds.slice(offset, offset + 10),
+        }),
+      );
+      if ((response.FailedEntryCount ?? 0) > 0) {
+        const failures = (response.FailedEntries ?? []).map(
+          (entry) => entry.ErrorMessage ?? entry.ErrorCode ?? 'Unknown target error',
+        );
+        throw new Error(`Failed to remove target(s): ${failures.join('; ')}`);
+      }
+    }
+  } finally {
+    client.destroy();
+  }
+}
+
+export async function saveRule(input: SaveRuleInput, config?: AwsClientConfig): Promise<SavedRule> {
+  const saved = await putRule(input.eventBusName, input.values, config);
+  await putTargets(input.eventBusName, input.values.name, input.values.targets, config);
+
+  const currentIds = new Set(input.values.targets.map((target) => target.id));
+  const removedIds = (input.originalTargetIds ?? []).filter((id) => !currentIds.has(id));
+  await removeTargets(input.eventBusName, input.values.name, removedIds, config);
+  return saved;
+}
+
+export async function deleteRule(input: DeleteRuleInput, config?: AwsClientConfig): Promise<void> {
+  const client = createEventBridgeClient(config);
+  try {
+    let nextToken: string | undefined;
+    const targetIds: string[] = [];
+    do {
+      const targets = await client.send(
+        new ListTargetsByRuleCommand({
+          EventBusName: input.eventBusName,
+          Rule: input.ruleName,
+          Limit: 100,
+          NextToken: nextToken,
+        }),
+      );
+      targetIds.push(
+        ...(targets.Targets ?? []).flatMap((target) => (target.Id ? [target.Id] : [])),
+      );
+      nextToken = targets.NextToken;
+    } while (nextToken);
+    for (let offset = 0; offset < targetIds.length; offset += 10) {
+      const removal = await client.send(
+        new RemoveTargetsCommand({
+          EventBusName: input.eventBusName,
+          Rule: input.ruleName,
+          Ids: targetIds.slice(offset, offset + 10),
+        }),
+      );
+      if ((removal.FailedEntryCount ?? 0) > 0) {
+        const failures = (removal.FailedEntries ?? []).map(
+          (entry) => entry.ErrorMessage ?? entry.ErrorCode ?? 'Unknown target error',
+        );
+        throw new Error(`Failed to remove target(s): ${failures.join('; ')}`);
+      }
+    }
+    await client.send(
+      new DeleteRuleCommand({ EventBusName: input.eventBusName, Name: input.ruleName }),
+    );
+  } finally {
+    client.destroy();
+  }
+}
+
+export async function setRuleState(
+  input: SetRuleStateInput,
+  config?: AwsClientConfig,
+): Promise<void> {
+  const client = createEventBridgeClient(config);
+  try {
+    const command =
+      input.state === 'ENABLED'
+        ? new EnableRuleCommand({ EventBusName: input.eventBusName, Name: input.ruleName })
+        : new DisableRuleCommand({ EventBusName: input.eventBusName, Name: input.ruleName });
+    await client.send(command);
   } finally {
     client.destroy();
   }

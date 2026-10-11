@@ -26,6 +26,7 @@ export interface EventBridgeRule {
   roleArn?: string;
   managedBy?: string;
   targets: RuleTarget[];
+  targetsLoaded?: boolean;
 }
 
 export interface EventBusDetail extends EventBusSummary {
@@ -45,4 +46,58 @@ export interface RulePage {
 
 export interface DeleteEventBusInput {
   name: string;
+}
+
+export type RuleState = 'ENABLED' | 'DISABLED';
+
+export interface RuleTargetInput {
+  id: string;
+  arn: string;
+  roleArn?: string;
+  input?: string;
+  inputPath?: string;
+}
+
+export interface RuleFormValues {
+  name: string;
+  description?: string;
+  eventPattern: string;
+  state: RuleState;
+  targets: RuleTargetInput[];
+}
+
+export interface SaveRuleInput {
+  eventBusName: string;
+  originalName?: string;
+  originalTargetIds?: string[];
+  values: RuleFormValues;
+}
+
+export interface DeleteRuleInput {
+  eventBusName: string;
+  ruleName: string;
+}
+
+export interface SetRuleStateInput extends DeleteRuleInput {
+  state: RuleState;
+}
+
+export interface SavedRule {
+  name: string;
+  arn?: string;
+}
+
+export type EventPatternSeverity = 'error' | 'warning';
+
+export interface EventPatternIssue {
+  path: string;
+  message: string;
+  severity: EventPatternSeverity;
+}
+
+export interface EventPatternValidationResult {
+  valid: boolean;
+  issues: EventPatternIssue[];
+  parsed?: unknown;
+  formatted?: string;
 }

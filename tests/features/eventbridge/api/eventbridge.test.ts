@@ -1,10 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   DeleteEventBusCommand,
+  DeleteRuleCommand,
   DescribeEventBusCommand,
+  DisableRuleCommand,
+  EnableRuleCommand,
   ListEventBusesCommand,
   ListRulesCommand,
   ListTargetsByRuleCommand,
+  PutRuleCommand,
+  PutTargetsCommand,
+  RemoveTargetsCommand,
 } from '@aws-sdk/client-eventbridge';
 
 const mocks = vi.hoisted(() => ({
@@ -22,6 +28,9 @@ import {
   listEventBuses,
   listRules,
   listTargetsByRule,
+  saveRule,
+  deleteRule as deleteEventBridgeRule,
+  setRuleState,
 } from '@/features/eventbridge/api/eventbridge';
 
 describe('EventBridge API', () => {
@@ -81,7 +90,10 @@ describe('EventBridge API', () => {
         return {
           Targets: [
             {
-              Id: 'target-1',
+              Id:
+                (command as ListTargetsByRuleCommand).input.Rule === 'orders-rule'
+                  ? 'target-1'
+                  : `target-${(command as ListTargetsByRuleCommand).input.Rule}`,
               Arn: 'arn:aws:sqs:us-east-1:000000000000:orders-queue',
               RoleArn: 'arn:aws:iam::000000000000:role/orders-role',
             },
@@ -187,7 +199,16 @@ describe('EventBridge API', () => {
           eventPattern: '{"source":["app.orders"]}',
           roleArn: undefined,
           managedBy: undefined,
-          targets: [],
+          targets: [
+            {
+              id: 'target-1',
+              arn: 'arn:aws:sqs:us-east-1:000000000000:orders-queue',
+              roleArn: 'arn:aws:iam::000000000000:role/orders-role',
+              input: undefined,
+              inputPath: undefined,
+            },
+          ],
+          targetsLoaded: true,
         },
         {
           name: 'customers-rule',
@@ -198,12 +219,21 @@ describe('EventBridge API', () => {
           eventPattern: '{"source":["app.customers"]}',
           roleArn: undefined,
           managedBy: undefined,
-          targets: [],
+          targets: [
+            {
+              id: 'target-customers-rule',
+              arn: 'arn:aws:sqs:us-east-1:000000000000:orders-queue',
+              roleArn: 'arn:aws:iam::000000000000:role/orders-role',
+              input: undefined,
+              inputPath: undefined,
+            },
+          ],
+          targetsLoaded: true,
         },
       ],
       nextToken: 'rules-next',
     });
-    expect(mocks.destroy).toHaveBeenCalledOnce();
+    expect(mocks.destroy).toHaveBeenCalledTimes(2);
   });
 
   it('maps enabled-with-all-cloudtrail-events state to ENABLED', async () => {
@@ -219,6 +249,7 @@ describe('EventBridge API', () => {
 
     const result = await listRules('default');
     expect(result.rules[0].state).toBe('ENABLED');
+    expect(mocks.destroy).toHaveBeenCalledTimes(2);
   });
 
   it('lists targets for a rule and drops targets without an id or arn', async () => {
@@ -259,6 +290,43 @@ describe('EventBridge API', () => {
       Name: 'orders',
     });
     expect(mocks.destroy).toHaveBeenCalledOnce();
+  });
+
+  it('saves a rule and reconciles removed and existing targets', async () => {
+    await saveRule({
+      eventBusName: 'orders',
+      originalTargetIds: ['keep', 'remove'],
+      values: {
+        name: 'orders-rule',
+        eventPattern: '{"source":["app.orders"]}',
+        state: 'ENABLED',
+        targets: [{ id: 'keep', arn: 'arn:aws:sqs:us-east-1:000000000000:orders' }],
+      },
+    });
+    expect(mocks.send.mock.calls[0][0]).toBeInstanceOf(PutRuleCommand);
+    expect((mocks.send.mock.calls[0][0] as PutRuleCommand).input).toMatchObject({
+      Name: 'orders-rule',
+      EventBusName: 'orders',
+      State: 'ENABLED',
+    });
+    expect(mocks.send.mock.calls[1][0]).toBeInstanceOf(PutTargetsCommand);
+    expect(mocks.send.mock.calls[2][0]).toBeInstanceOf(RemoveTargetsCommand);
+    expect((mocks.send.mock.calls[2][0] as RemoveTargetsCommand).input.Ids).toEqual(['remove']);
+    expect(mocks.destroy).toHaveBeenCalledTimes(3);
+  });
+
+  it('removes targets before deleting a rule', async () => {
+    await deleteEventBridgeRule({ eventBusName: 'orders', ruleName: 'orders-rule' });
+    expect(mocks.send.mock.calls[0][0]).toBeInstanceOf(ListTargetsByRuleCommand);
+    expect(mocks.send.mock.calls[1][0]).toBeInstanceOf(RemoveTargetsCommand);
+    expect(mocks.send.mock.calls[2][0]).toBeInstanceOf(DeleteRuleCommand);
+  });
+
+  it('uses explicit enable and disable commands', async () => {
+    await setRuleState({ eventBusName: 'orders', ruleName: 'orders-rule', state: 'ENABLED' });
+    await setRuleState({ eventBusName: 'orders', ruleName: 'orders-rule', state: 'DISABLED' });
+    expect(mocks.send.mock.calls[0][0]).toBeInstanceOf(EnableRuleCommand);
+    expect(mocks.send.mock.calls[1][0]).toBeInstanceOf(DisableRuleCommand);
   });
 
   it('surfaces request failures and destroys the client', async () => {

@@ -122,6 +122,10 @@ describe('EventBridge components', () => {
         hasNextPage
         onLoadMore={onLoadMore}
         onRetry={vi.fn()}
+        onCreateRule={vi.fn()}
+        onEditRule={vi.fn()}
+        onDeleteRule={vi.fn()}
+        onSetRuleState={vi.fn()}
       />,
     );
 
@@ -132,6 +136,9 @@ describe('EventBridge components', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Load more rules' }));
     expect(onLoadMore).toHaveBeenCalledOnce();
+    expect(screen.getByRole('button', { name: 'Edit rule orders-rule' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Delete rule orders-rule' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Disable rule orders-rule' })).toBeTruthy();
   });
 
   it('shows empty and error states for rules', () => {

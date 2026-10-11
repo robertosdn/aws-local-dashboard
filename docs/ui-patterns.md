@@ -12,10 +12,10 @@ Every resource page uses a consistent header structure:
 <div className="flex items-center justify-between">
   <div>
     <p className="text-sm font-medium uppercase tracking-[0.2em] text-cyan-400">
-      {AWS_SERVICE_NAME}  {/* e.g., "SQS", "S3", "DynamoDB", "Lambda" */}
+      {AWS_SERVICE_NAME} {/* e.g., "SQS", "S3", "DynamoDB", "Lambda" */}
     </p>
     <h2 className="mt-3 text-2xl font-semibold text-white">
-      {RESOURCE_COLLECTION_NAME}  {/* e.g., "Queues", "Buckets", "Tables", "Functions" */}
+      {RESOURCE_COLLECTION_NAME} {/* e.g., "Queues", "Buckets", "Tables", "Functions" */}
     </h2>
   </div>
   <RefreshButton onClick={handleRefresh} loading={loading} />
@@ -23,6 +23,7 @@ Every resource page uses a consistent header structure:
 ```
 
 **Rules:**
+
 - Category label (uppercase, small): AWS service name (SQS, S3, DynamoDB, Lambda)
 - Main title (large): Plural resource collection name (Queues, Buckets, Tables, Functions)
 - Right side: Refresh button (and other page-level actions)
@@ -33,12 +34,8 @@ Same structure, but with error styling:
 
 ```tsx
 <div className="rounded-2xl border border-red-500/50 bg-red-500/10 p-6">
-  <p className="text-sm font-medium uppercase tracking-[0.2em] text-red-400">
-    {AWS_SERVICE_NAME}
-  </p>
-  <h2 className="mt-3 text-2xl font-semibold text-white">
-    {RESOURCE_COLLECTION_NAME}
-  </h2>
+  <p className="text-sm font-medium uppercase tracking-[0.2em] text-red-400">{AWS_SERVICE_NAME}</p>
+  <h2 className="mt-3 text-2xl font-semibold text-white">{RESOURCE_COLLECTION_NAME}</h2>
   {/* Error message and Retry button */}
 </div>
 ```
@@ -47,23 +44,23 @@ Same structure, but with error styling:
 
 Resource list tables use consistent **icon buttons** with accessible labels. Order: **View → [Items/Open] → Delete**
 
-| Button | Icon | Purpose | Variant |
-|--------|------|---------|---------|
-| **View** | `Info` | Show resource metadata/configuration (creation date, keys, encryption, versioning, etc.) | `ghost` / `icon` size |
-| **Items** | `Table` (DynamoDB) | Navigate to the records/items inside the resource | `ghost` / `icon` size |
-| **Open** | `FolderOpen` (S3) | Browse contents of container-like resources | `ghost` / `icon` size |
-| **Delete** | `Trash2` | Permanently remove the resource | `ghost` / `icon` size + red styling |
+| Button     | Icon               | Purpose                                                                                  | Variant                             |
+| ---------- | ------------------ | ---------------------------------------------------------------------------------------- | ----------------------------------- |
+| **View**   | `Info`             | Show resource metadata/configuration (creation date, keys, encryption, versioning, etc.) | `ghost` / `icon` size               |
+| **Items**  | `Table` (DynamoDB) | Navigate to the records/items inside the resource                                        | `ghost` / `icon` size               |
+| **Open**   | `FolderOpen` (S3)  | Browse contents of container-like resources                                              | `ghost` / `icon` size               |
+| **Delete** | `Trash2`           | Permanently remove the resource                                                          | `ghost` / `icon` size + red styling |
 
 ### Per-Resource Mapping
 
-| Resource | View | Items/Open | Delete |
-|----------|------|------------|--------|
-| **SQS Queues** | `Info` icon (queue attributes: ARN, creation/modified timestamps, visibility, retention, delay, redrive, encryption) | `View Messages` (Eye icon) → modal, `Send Message` (Send icon) → dialog (queue pre-selected from the row) | `Purge` (Eraser icon, clears messages) |
-| **S3 Buckets** | `Info` icon (config: region, versioning, encryption, public access) | `FolderOpen` icon (browse objects) | `Trash2` icon (bucket must be empty) |
-| **DynamoDB Tables** | `Info` icon (keys, indexes, capacity, metadata) | `Table` icon (Query/Scan tabs) | `Trash2` icon (removes all items) |
-| **Lambda Functions** | `Info` icon (config, code, environment) | `Play` icon (Invoke/test execution) | N/A (not implemented) |
-| **EventBridge Event Buses** | `Info` icon (ARN, creation date, policy, rules) | N/A | `Trash2` icon (custom buses only) |
-| **EventBridge Scheduler Groups** | `Info` icon (name, ARN, creation and last modification dates) | `Table` icon (schedules in the group) | N/A (read-only) |
+| Resource                         | View                                                                                                                 | Items/Open                                                                                                        | Delete                                                                           |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **SQS Queues**                   | `Info` icon (queue attributes: ARN, creation/modified timestamps, visibility, retention, delay, redrive, encryption) | `View Messages` (Eye icon) → modal, `Send Message` (Send icon) → dialog (queue pre-selected from the row)         | `Purge` (Eraser icon, clears messages)                                           |
+| **S3 Buckets**                   | `Info` icon (config: region, versioning, encryption, public access)                                                  | `FolderOpen` icon (browse objects)                                                                                | `Trash2` icon (bucket must be empty)                                             |
+| **DynamoDB Tables**              | `Info` icon (keys, indexes, capacity, metadata)                                                                      | `Table` icon (Query/Scan tabs)                                                                                    | `Trash2` icon (removes all items)                                                |
+| **Lambda Functions**             | `Info` icon (config, code, environment)                                                                              | `Play` icon (Invoke/test execution)                                                                               | N/A (not implemented)                                                            |
+| **EventBridge Event Buses**      | `Info` icon (ARN, creation date, policy, rules)                                                                      | On the detail view: create, edit, enable/disable, and delete event-pattern rules; manage targets in the rule form | `Trash2` icon (custom buses only); rule deletion is confirmed in the detail view |
+| **EventBridge Scheduler Groups** | `Info` icon (name, ARN, creation and last modification dates)                                                        | `Table` icon (schedules in the group)                                                                             | N/A (read-only)                                                                  |
 
 SQS queue rows render their actions in the order **View → View Messages → Send Message → Purge**, each as an icon button with an accessible label that names the queue. The SQS `View` action opens a modal dialog with the queue attributes rather than a dedicated detail screen.
 
@@ -120,12 +117,12 @@ SQS queue rows render their actions in the order **View → View Messages → Se
 
 Sidebar entries use AWS service names, not collection names:
 
-| Service | Sidebar Label | Route |
-|---------|---------------|-------|
-| SQS | `SQS` | `/queues` |
-| Lambda | `Lambda` | `/lambda` |
-| DynamoDB | `DynamoDB` | `/dynamodb` |
-| S3 | `S3` | `/s3` |
+| Service  | Sidebar Label | Route       |
+| -------- | ------------- | ----------- |
+| SQS      | `SQS`         | `/queues`   |
+| Lambda   | `Lambda`      | `/lambda`   |
+| DynamoDB | `DynamoDB`    | `/dynamodb` |
+| S3       | `S3`          | `/s3`       |
 
 ## Resource Detail Views
 
@@ -137,18 +134,21 @@ When "View" is clicked, show a dedicated detail screen with:
 4. **Loading/Error/Empty states** - Consistent with list views
 
 Example structure (S3 BucketDetails, DynamoDB TableDetails):
+
 ```tsx
 <section className="space-y-4">
   <div className="flex items-center justify-between">
     <div>
       <p className="text-xs font-medium uppercase tracking-[0.2em] text-cyan-400">
-        {DETAIL_CATEGORY}  {/* "Bucket configuration", "Table Details" */}
+        {DETAIL_CATEGORY} {/* "Bucket configuration", "Table Details" */}
       </p>
       <h3 className="mt-1 font-mono text-xl font-semibold text-white">{resourceName}</h3>
     </div>
-    <Button variant="outline" onClick={onBack}>Back to {collectionName}</Button>
+    <Button variant="outline" onClick={onBack}>
+      Back to {collectionName}
+    </Button>
   </div>
-  
+
   <Card className="space-y-5 p-6">
     {/* Grid of metadata fields */}
     <Separator />

@@ -3,3 +3,7 @@ export { EventBusDetails } from './EventBusDetails';
 export { EventBusPolicyDisplay } from './EventBusPolicyDisplay';
 export { EventBusTable } from './EventBusTable';
 export { RuleList } from './RuleList';
+export { RuleFormDialog } from './RuleFormDialog';
+export { DeleteRuleDialog } from './DeleteRuleDialog';
+export { EventPatternField } from './EventPatternField';
+export { RuleTargetsEditor } from './RuleTargetsEditor';

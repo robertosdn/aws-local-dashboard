@@ -23,9 +23,10 @@ const sampleRules = [
   {
     Name: 'dashboard-sample-enabled',
     Description: 'Sample enabled rule that matches order events',
-    EventPattern: JSON.stringify({ source: ['app.orders'] }),
+    EventPattern: JSON.stringify({ source: [{ prefix: 'app.orders' }] }),
     State: 'ENABLED',
     targetId: 'dashboard-sample-target',
+    targetArns: [targetArn],
   },
   {
     Name: 'dashboard-sample-disabled',
@@ -33,6 +34,19 @@ const sampleRules = [
     EventPattern: JSON.stringify({ source: ['app.customers'] }),
     State: 'DISABLED',
     targetId: 'dashboard-sample-target',
+    targetArns: [targetArn],
+  },
+  {
+    Name: 'dashboard-sample-multi-target',
+    Description: 'Sample rule with multiple destinations and anything-but matching',
+    EventPattern: JSON.stringify({ detail: { status: [{ 'anything-but': ['cancelled'] }] } }),
+    State: 'ENABLED',
+    targetId: 'dashboard-sample-sqs-target',
+    targetArns: [
+      targetArn,
+      process.env.LAMBDA_TARGET_ARN ??
+        `arn:aws:lambda:${region}:000000000000:function:dashboard-sample-handler`,
+    ],
   },
 ];
 
@@ -54,13 +68,11 @@ async function upsertTarget(rule) {
     new PutTargetsCommand({
       Rule: rule.Name,
       EventBusName: eventBusName,
-      Targets: [
-        {
-          Id: rule.targetId,
-          Arn: targetArn,
-          RoleArn: targetRoleArn,
-        },
-      ],
+      Targets: rule.targetArns.map((arn, index) => ({
+        Id: index === 0 ? rule.targetId : `${rule.targetId}-${index + 1}`,
+        Arn: arn,
+        RoleArn: targetRoleArn,
+      })),
     }),
   );
 }
@@ -72,9 +84,7 @@ async function main() {
     console.log(`EventBridge rule upserted: ${rule.Name} (${rule.State})`);
   }
 
-  console.log(
-    `EventBridge sample data ready on "${eventBusName}" (target ${targetArn}).`,
-  );
+  console.log(`EventBridge sample data ready on "${eventBusName}" (target ${targetArn}).`);
 }
 
 main()
