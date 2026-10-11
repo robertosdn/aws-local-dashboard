@@ -22,7 +22,8 @@ A client-side AWS resource dashboard for local development. Connects directly to
 - **EventBridge Scheduler Management**
   - List schedule groups and open a group's schedules
   - Filter schedules by state (enabled/disabled) and inspect a schedule's target
-  - Read-only: no create, edit, delete, or manual run actions
+  - Create, edit, enable/disable, and delete schedules and configure their targets
+  - Validate schedule expressions (`rate`, `cron`, `at`) and time zones locally before saving
 
 - **Local-First Architecture**
   - Runs entirely in the browser

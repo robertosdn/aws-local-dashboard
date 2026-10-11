@@ -1,14 +1,21 @@
 import {
+  CreateScheduleCommand,
+  DeleteScheduleCommand,
   GetScheduleCommand,
   GetScheduleGroupCommand,
   ListScheduleGroupsCommand,
   ListSchedulesCommand,
+  UpdateScheduleCommand,
 } from '@aws-sdk/client-scheduler';
 import type { GetScheduleCommandOutput } from '@aws-sdk/client-scheduler';
 import { createSchedulerClient, type AwsClientConfig } from '@/services/aws';
 import {
   DEFAULT_SCHEDULE_GROUP_NAME,
+  type DeleteScheduleInput,
+  type SaveScheduleInput,
+  type SavedSchedule,
   type ScheduleDetails,
+  type ScheduleFormValues,
   type ScheduleGroupDetail,
   type ScheduleGroupPage,
   type ScheduleGroupSummary,
@@ -16,6 +23,8 @@ import {
   type ScheduleState,
   type ScheduleSummary,
   type ScheduleTarget,
+  type ScheduleTargetInput,
+  type SetScheduleStateInput,
 } from '../types/scheduler';
 
 const PAGE_SIZE = 100;
@@ -75,9 +84,7 @@ function mapTarget(target: GetScheduleCommandOutput['Target']): ScheduleTarget |
           maximumRetryAttempts: target.RetryPolicy.MaximumRetryAttempts,
         }
       : undefined,
-    deadLetterConfig: target.DeadLetterConfig
-      ? { arn: target.DeadLetterConfig.Arn }
-      : undefined,
+    deadLetterConfig: target.DeadLetterConfig ? { arn: target.DeadLetterConfig.Arn } : undefined,
     sqsParameters: target.SqsParameters
       ? { messageGroupId: target.SqsParameters.MessageGroupId }
       : undefined,
@@ -92,8 +99,7 @@ function mapTarget(target: GetScheduleCommandOutput['Target']): ScheduleTarget |
       : undefined,
     ecsParameters: target.EcsParameters as unknown as Record<string, unknown> | undefined,
     sageMakerPipelineParameters: target.SageMakerPipelineParameters as unknown as
-      | Record<string, unknown>
-      | undefined,
+      Record<string, unknown> | undefined,
   };
 }
 
@@ -205,6 +211,165 @@ export async function getScheduleDetails(
         : undefined,
       target: mapTarget(response.Target),
     };
+  } finally {
+    client.destroy();
+  }
+}
+
+function toSdkTarget(target: ScheduleTargetInput) {
+  const retryPolicy =
+    target.retryPolicy &&
+    (target.retryPolicy.maximumEventAgeInSeconds !== undefined ||
+      target.retryPolicy.maximumRetryAttempts !== undefined)
+      ? {
+          MaximumEventAgeInSeconds: target.retryPolicy.maximumEventAgeInSeconds,
+          MaximumRetryAttempts: target.retryPolicy.maximumRetryAttempts,
+        }
+      : undefined;
+
+  const eventBridgeParameters =
+    target.eventBridgeParameters?.detailType?.trim() && target.eventBridgeParameters.source?.trim()
+      ? {
+          DetailType: target.eventBridgeParameters.detailType,
+          Source: target.eventBridgeParameters.source,
+        }
+      : undefined;
+
+  return {
+    Arn: target.arn,
+    RoleArn: target.roleArn?.trim() ? target.roleArn : undefined,
+    Input: target.input?.trim() ? target.input : undefined,
+    RetryPolicy: retryPolicy,
+    DeadLetterConfig: target.deadLetterConfig?.arn?.trim()
+      ? { Arn: target.deadLetterConfig.arn }
+      : undefined,
+    SqsParameters: target.sqsParameters?.messageGroupId?.trim()
+      ? { MessageGroupId: target.sqsParameters.messageGroupId }
+      : undefined,
+    EventBridgeParameters: eventBridgeParameters,
+    KinesisParameters: target.kinesisParameters?.partitionKey?.trim()
+      ? { PartitionKey: target.kinesisParameters.partitionKey }
+      : undefined,
+  };
+}
+
+function parseOptionalDate(value?: string): Date | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+
+  // Scheduler dates are UTC; treat a value without a designator as UTC rather
+  // than the browser's local zone.
+  const normalized = /(?:Z|[+-]\d{2}:?\d{2})$/.test(trimmed) ? trimmed : `${trimmed}Z`;
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
+function toSdkScheduleInput(groupName: string, values: ScheduleFormValues) {
+  return {
+    Name: values.name,
+    GroupName: groupName,
+    Description: values.description?.trim() ? values.description : undefined,
+    ScheduleExpression: values.scheduleExpression,
+    ScheduleExpressionTimezone: values.scheduleExpressionTimezone,
+    State: values.state,
+    ActionAfterCompletion: values.actionAfterCompletion,
+    StartDate: parseOptionalDate(values.startDate),
+    EndDate: parseOptionalDate(values.endDate),
+    FlexibleTimeWindow:
+      values.flexibleTimeWindow.mode === 'FLEXIBLE'
+        ? {
+            Mode: 'FLEXIBLE' as const,
+            MaximumWindowInMinutes: values.flexibleTimeWindow.maximumWindowInMinutes,
+          }
+        : { Mode: 'OFF' as const },
+    Target: toSdkTarget(values.target),
+  };
+}
+
+export async function createSchedule(
+  groupName: string,
+  values: ScheduleFormValues,
+  config?: AwsClientConfig,
+): Promise<SavedSchedule> {
+  const client = createSchedulerClient(config);
+  try {
+    const response = await client.send(
+      new CreateScheduleCommand(toSdkScheduleInput(groupName, values)),
+    );
+    return { name: values.name, arn: response.ScheduleArn };
+  } finally {
+    client.destroy();
+  }
+}
+
+export async function updateSchedule(
+  groupName: string,
+  values: ScheduleFormValues,
+  config?: AwsClientConfig,
+): Promise<SavedSchedule> {
+  const client = createSchedulerClient(config);
+  try {
+    const response = await client.send(
+      new UpdateScheduleCommand(toSdkScheduleInput(groupName, values)),
+    );
+    return { name: values.name, arn: response.ScheduleArn };
+  } finally {
+    client.destroy();
+  }
+}
+
+export async function saveSchedule(
+  input: SaveScheduleInput,
+  config?: AwsClientConfig,
+): Promise<SavedSchedule> {
+  return input.originalName
+    ? updateSchedule(input.groupName, input.values, config)
+    : createSchedule(input.groupName, input.values, config);
+}
+
+export async function deleteSchedule(
+  input: DeleteScheduleInput,
+  config?: AwsClientConfig,
+): Promise<void> {
+  const client = createSchedulerClient(config);
+  try {
+    await client.send(
+      new DeleteScheduleCommand({ Name: input.scheduleName, GroupName: input.groupName }),
+    );
+  } finally {
+    client.destroy();
+  }
+}
+
+/**
+ * `UpdateSchedule` replaces the whole schedule, so the current configuration is
+ * read first and written back with only `State` changed.
+ */
+export async function setScheduleState(
+  input: SetScheduleStateInput,
+  config?: AwsClientConfig,
+): Promise<void> {
+  const client = createSchedulerClient(config);
+  try {
+    const current = await client.send(
+      new GetScheduleCommand({ Name: input.scheduleName, GroupName: input.groupName }),
+    );
+
+    await client.send(
+      new UpdateScheduleCommand({
+        Name: input.scheduleName,
+        GroupName: input.groupName,
+        Description: current.Description,
+        ScheduleExpression: current.ScheduleExpression,
+        ScheduleExpressionTimezone: current.ScheduleExpressionTimezone,
+        State: input.state,
+        ActionAfterCompletion: current.ActionAfterCompletion,
+        StartDate: current.StartDate,
+        EndDate: current.EndDate,
+        FlexibleTimeWindow: current.FlexibleTimeWindow,
+        Target: current.Target,
+      }),
+    );
   } finally {
     client.destroy();
   }

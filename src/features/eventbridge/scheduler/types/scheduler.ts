@@ -72,3 +72,72 @@ export interface ScheduleDetails extends ScheduleSummary {
   flexibleTimeWindow?: FlexibleTimeWindow;
   target?: ScheduleTarget;
 }
+
+export type ActionAfterCompletion = 'NONE' | 'DELETE';
+
+/** Editable target shape, aligned with the read-only ScheduleTarget type. */
+export interface ScheduleTargetInput {
+  arn: string;
+  roleArn?: string;
+  input?: string;
+  retryPolicy?: ScheduleRetryPolicy;
+  deadLetterConfig?: ScheduleDeadLetterConfig;
+  sqsParameters?: { messageGroupId?: string };
+  eventBridgeParameters?: { detailType?: string; source?: string };
+  kinesisParameters?: { partitionKey?: string };
+}
+
+export interface ScheduleFormValues {
+  name: string;
+  description?: string;
+  scheduleExpression: string;
+  scheduleExpressionTimezone: string;
+  state: ScheduleState;
+  actionAfterCompletion: ActionAfterCompletion;
+  startDate?: string;
+  endDate?: string;
+  flexibleTimeWindow: FlexibleTimeWindow;
+  target: ScheduleTargetInput;
+}
+
+export interface SaveScheduleInput {
+  groupName: string;
+  /** Present when editing an existing schedule; the name is immutable. */
+  originalName?: string;
+  values: ScheduleFormValues;
+}
+
+export interface DeleteScheduleInput {
+  groupName: string;
+  scheduleName: string;
+}
+
+export interface SetScheduleStateInput {
+  groupName: string;
+  scheduleName: string;
+  state: ScheduleState;
+}
+
+export interface SavedSchedule {
+  name: string;
+  arn?: string;
+}
+
+export type ScheduleValidationSeverity = 'error' | 'warning';
+
+export interface ScheduleValidationIssue {
+  path: string;
+  message: string;
+  severity: ScheduleValidationSeverity;
+}
+
+export type ScheduleExpressionKind = 'at' | 'rate' | 'cron';
+
+export interface ScheduleExpressionValidationResult {
+  valid: boolean;
+  kind?: ScheduleExpressionKind;
+  description?: string;
+  issues: ScheduleValidationIssue[];
+}
+
+export const SCHEDULE_EXPRESSION_MAX_LENGTH = 256;

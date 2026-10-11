@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 import {
   Select,
   SelectContent,
@@ -9,8 +10,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ScheduleTable, useSchedules } from '@/features/eventbridge';
-import type { ScheduleState } from '@/features/eventbridge';
+import {
+  DeleteScheduleDialog,
+  ScheduleFormDialog,
+  ScheduleTable,
+  useDeleteSchedule,
+  useSaveSchedule,
+  useSchedules,
+  useSetScheduleState,
+} from '@/features/eventbridge';
+import type { ScheduleFormValues, ScheduleState, ScheduleSummary } from '@/features/eventbridge';
 
 type ScheduleStateFilter = 'all' | ScheduleState;
 
@@ -20,6 +29,11 @@ export default function SchedulerSchedulesPage() {
   const [stateFilter, setStateFilter] = useState<ScheduleStateFilter>('all');
   const [pageTokens, setPageTokens] = useState<Array<string | undefined>>([undefined]);
   const [pageIndex, setPageIndex] = useState(0);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<ScheduleSummary | null>(null);
+  const [deletingSchedule, setDeletingSchedule] = useState<ScheduleSummary | null>(null);
+  const [pendingScheduleName, setPendingScheduleName] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const resolvedState = stateFilter === 'all' ? undefined : stateFilter;
   const cursor = pageTokens[pageIndex];
@@ -28,6 +42,9 @@ export default function SchedulerSchedulesPage() {
     resolvedState,
     cursor,
   );
+  const saveMutation = useSaveSchedule(groupName ?? '');
+  const deleteMutation = useDeleteSchedule(groupName ?? '');
+  const stateMutation = useSetScheduleState(groupName ?? '');
 
   const goBack = () =>
     navigate(`/eventbridge/scheduler/groups/${encodeURIComponent(groupName ?? '')}`);
@@ -48,6 +65,70 @@ export default function SchedulerSchedulesPage() {
     navigate(
       `/eventbridge/scheduler/groups/${encodeURIComponent(groupName ?? '')}/schedules/${encodeURIComponent(name)}`,
     );
+
+  const saveSchedule = async (values: ScheduleFormValues) => {
+    try {
+      await saveMutation.saveSchedule({
+        groupName: groupName ?? '',
+        originalName: editingSchedule?.name,
+        values,
+      });
+      toast({
+        title: editingSchedule ? 'Schedule updated' : 'Schedule created',
+        description: values.name,
+      });
+      setFormOpen(false);
+      setEditingSchedule(null);
+    } catch (mutationError) {
+      toast({
+        title: 'Could not save schedule',
+        description: mutationError instanceof Error ? mutationError.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const deleteSelectedSchedule = async () => {
+    if (!deletingSchedule || !groupName) return;
+    try {
+      await deleteMutation.deleteSchedule({
+        groupName,
+        scheduleName: deletingSchedule.name,
+      });
+      toast({ title: 'Schedule deleted', description: deletingSchedule.name });
+      setDeletingSchedule(null);
+    } catch (mutationError) {
+      toast({
+        title: 'Could not delete schedule',
+        description: mutationError instanceof Error ? mutationError.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const setSelectedScheduleState = async (schedule: ScheduleSummary, state: ScheduleState) => {
+    if (!groupName) return;
+    setPendingScheduleName(schedule.name);
+    try {
+      await stateMutation.setScheduleState({
+        groupName,
+        scheduleName: schedule.name,
+        state,
+      });
+      toast({
+        title: `Schedule ${state === 'ENABLED' ? 'enabled' : 'disabled'}`,
+        description: schedule.name,
+      });
+    } catch (mutationError) {
+      toast({
+        title: 'Could not update schedule state',
+        description: mutationError instanceof Error ? mutationError.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    } finally {
+      setPendingScheduleName(null);
+    }
+  };
 
   return (
     <div className="min-w-0 space-y-6">
@@ -90,7 +171,45 @@ export default function SchedulerSchedulesPage() {
         onViewSchedule={openSchedule}
         onLoadMore={loadNextPage}
         onRetry={() => void refetch()}
+        actionsDisabled={fetching}
+        pendingScheduleName={pendingScheduleName}
+        onCreateSchedule={() => {
+          setEditingSchedule(null);
+          setFormOpen(true);
+        }}
+        onEditSchedule={(schedule) => {
+          setEditingSchedule(schedule);
+          setFormOpen(true);
+        }}
+        onDeleteSchedule={setDeletingSchedule}
+        onSetScheduleState={(schedule, state) => void setSelectedScheduleState(schedule, state)}
       />
+
+      {groupName ? (
+        <>
+          <ScheduleFormDialog
+            open={formOpen}
+            groupName={groupName}
+            scheduleName={editingSchedule?.name}
+            pending={saveMutation.pending}
+            error={saveMutation.error}
+            onOpenChange={(open) => {
+              setFormOpen(open);
+              if (!open) setEditingSchedule(null);
+            }}
+            onSave={(values) => void saveSchedule(values)}
+          />
+          <DeleteScheduleDialog
+            scheduleName={deletingSchedule?.name ?? null}
+            pending={deleteMutation.pending}
+            error={deleteMutation.error}
+            onOpenChange={(open) => {
+              if (!open) setDeletingSchedule(null);
+            }}
+            onConfirm={() => void deleteSelectedSchedule()}
+          />
+        </>
+      ) : null}
 
       {schedules.length > 0 ? (
         <div className="flex items-center justify-between">

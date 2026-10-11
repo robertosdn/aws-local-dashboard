@@ -1,15 +1,22 @@
 import { format } from 'date-fns';
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 import {
+  DeleteScheduleDialog,
   ScheduleExpressionDisplay,
+  ScheduleFormDialog,
   ScheduleTargetDisplay,
+  useDeleteSchedule,
+  useSaveSchedule,
   useScheduleDetails,
+  useSetScheduleState,
 } from '@/features/eventbridge';
+import type { ScheduleFormValues, ScheduleState } from '@/features/eventbridge';
 
 function formatDate(value?: Date) {
   return value ? format(value, 'yyyy-MM-dd HH:mm:ss') : 'Not set';
@@ -28,9 +35,66 @@ export default function SchedulerScheduleDetailPage() {
   const { groupName, scheduleName } = useParams<{ groupName: string; scheduleName: string }>();
   const navigate = useNavigate();
   const details = useScheduleDetails(groupName ?? null, scheduleName ?? null);
+  const saveMutation = useSaveSchedule(groupName ?? '');
+  const deleteMutation = useDeleteSchedule(groupName ?? '');
+  const stateMutation = useSetScheduleState(groupName ?? '');
+  const [formOpen, setFormOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const { toast } = useToast();
 
   const goBack = () =>
     navigate(`/eventbridge/scheduler/groups/${encodeURIComponent(groupName ?? '')}/schedules`);
+
+  const saveSchedule = async (values: ScheduleFormValues) => {
+    try {
+      await saveMutation.saveSchedule({
+        groupName: groupName ?? '',
+        originalName: scheduleName,
+        values,
+      });
+      toast({ title: 'Schedule updated', description: values.name });
+      setFormOpen(false);
+    } catch (mutationError) {
+      toast({
+        title: 'Could not save schedule',
+        description: mutationError instanceof Error ? mutationError.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const deleteSchedule = async () => {
+    if (!groupName || !scheduleName) return;
+    try {
+      await deleteMutation.deleteSchedule({ groupName, scheduleName });
+      toast({ title: 'Schedule deleted', description: scheduleName });
+      setDeleteOpen(false);
+      goBack();
+    } catch (mutationError) {
+      toast({
+        title: 'Could not delete schedule',
+        description: mutationError instanceof Error ? mutationError.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const setScheduleState = async (state: ScheduleState) => {
+    if (!groupName || !scheduleName) return;
+    try {
+      await stateMutation.setScheduleState({ groupName, scheduleName, state });
+      toast({
+        title: `Schedule ${state === 'ENABLED' ? 'enabled' : 'disabled'}`,
+        description: scheduleName,
+      });
+    } catch (mutationError) {
+      toast({
+        title: 'Could not update schedule state',
+        description: mutationError instanceof Error ? mutationError.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    }
+  };
 
   if (details.error) {
     return (
@@ -90,9 +154,37 @@ export default function SchedulerScheduleDetailPage() {
               {schedule.name}
             </h3>
           </div>
-          <Button variant="outline" onClick={goBack}>
-            Back to schedules
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              disabled={stateMutation.pending}
+              onClick={() =>
+                void setScheduleState(schedule.state === 'ENABLED' ? 'DISABLED' : 'ENABLED')
+              }
+              aria-label={`${
+                schedule.state === 'ENABLED' ? 'Disable' : 'Enable'
+              } schedule ${schedule.name}`}
+            >
+              {schedule.state === 'ENABLED' ? 'Disable' : 'Enable'}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={saveMutation.pending}
+              onClick={() => setFormOpen(true)}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteMutation.pending}
+              onClick={() => setDeleteOpen(true)}
+            >
+              Delete
+            </Button>
+            <Button variant="ghost" onClick={goBack}>
+              Back to schedules
+            </Button>
+          </div>
         </div>
 
         <Card className="space-y-5 bg-slate-900/50 p-6">
@@ -164,6 +256,27 @@ export default function SchedulerScheduleDetailPage() {
           <ScheduleTargetDisplay target={schedule.target} />
         </Card>
       </section>
+
+      {groupName ? (
+        <>
+          <ScheduleFormDialog
+            open={formOpen}
+            groupName={groupName}
+            scheduleName={scheduleName}
+            pending={saveMutation.pending}
+            error={saveMutation.error}
+            onOpenChange={setFormOpen}
+            onSave={(values) => void saveSchedule(values)}
+          />
+          <DeleteScheduleDialog
+            scheduleName={deleteOpen ? (scheduleName ?? null) : null}
+            pending={deleteMutation.pending}
+            error={deleteMutation.error}
+            onOpenChange={setDeleteOpen}
+            onConfirm={() => void deleteSchedule()}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

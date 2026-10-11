@@ -1,14 +1,37 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ScheduleExpressionDisplay } from '@/features/eventbridge/scheduler/components/ScheduleExpressionDisplay';
 import { ScheduleGroupDetails } from '@/features/eventbridge/scheduler/components/ScheduleGroupDetails';
 import { ScheduleGroupTable } from '@/features/eventbridge/scheduler/components/ScheduleGroupTable';
 import { ScheduleTable } from '@/features/eventbridge/scheduler/components/ScheduleTable';
 import { ScheduleTargetDisplay } from '@/features/eventbridge/scheduler/components/ScheduleTargetDisplay';
+import { ScheduleExpressionField } from '@/features/eventbridge/scheduler/components/ScheduleExpressionField';
+import { ScheduleTargetEditor } from '@/features/eventbridge/scheduler/components/ScheduleTargetEditor';
+import { ScheduleFormDialog } from '@/features/eventbridge/scheduler/components/ScheduleFormDialog';
+import { DeleteScheduleDialog } from '@/features/eventbridge/scheduler/components/DeleteScheduleDialog';
+
+const detailsMock = vi.hoisted(() => ({ useScheduleDetails: vi.fn() }));
+
+vi.mock('@/features/eventbridge/scheduler/hooks/useScheduleDetails', () => ({
+  useScheduleDetails: detailsMock.useScheduleDetails,
+}));
 
 describe('Scheduler components', () => {
-  afterEach(cleanup);
+  beforeEach(() => {
+    detailsMock.useScheduleDetails.mockReturnValue({
+      scheduleDetails: undefined,
+      loading: false,
+      fetching: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
 
   it('renders schedule groups with View and Schedules actions', () => {
     const onViewGroup = vi.fn();
@@ -79,14 +102,71 @@ describe('Scheduler components', () => {
     expect(onViewSchedule).toHaveBeenCalledWith('hourly');
   });
 
+  it('offers management actions on each schedule row', () => {
+    const onCreate = vi.fn();
+    const onEdit = vi.fn();
+    const onDelete = vi.fn();
+    const onSetState = vi.fn();
+    const schedule = {
+      name: 'hourly',
+      arn: 'arn:hourly',
+      groupName: 'orders',
+      state: 'ENABLED' as const,
+    };
+
+    render(
+      <ScheduleTable
+        schedules={[schedule]}
+        loading={false}
+        hasNextPage={false}
+        onViewSchedule={vi.fn()}
+        onLoadMore={vi.fn()}
+        onRetry={vi.fn()}
+        onCreateSchedule={onCreate}
+        onEditSchedule={onEdit}
+        onDeleteSchedule={onDelete}
+        onSetScheduleState={onSetState}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create schedule' }));
+    expect(onCreate).toHaveBeenCalledOnce();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit schedule hourly' }));
+    expect(onEdit).toHaveBeenCalledWith(schedule);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete schedule hourly' }));
+    expect(onDelete).toHaveBeenCalledWith(schedule);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Disable schedule hourly' }));
+    expect(onSetState).toHaveBeenCalledWith(schedule, 'DISABLED');
+  });
+
+  it('shows the create action in the empty state', () => {
+    const onCreate = vi.fn();
+
+    render(
+      <ScheduleTable
+        schedules={[]}
+        loading={false}
+        hasNextPage={false}
+        onViewSchedule={vi.fn()}
+        onLoadMore={vi.fn()}
+        onRetry={vi.fn()}
+        onCreateSchedule={onCreate}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create schedule' }));
+    expect(onCreate).toHaveBeenCalledOnce();
+  });
+
   it('offers a load more action when more schedules exist', () => {
     const onLoadMore = vi.fn();
 
     render(
       <ScheduleTable
-        schedules={[
-          { name: 'hourly', arn: 'arn:hourly', groupName: 'orders', state: 'ENABLED' },
-        ]}
+        schedules={[{ name: 'hourly', arn: 'arn:hourly', groupName: 'orders', state: 'ENABLED' }]}
         loading={false}
         hasNextPage
         onViewSchedule={vi.fn()}
@@ -137,9 +217,7 @@ describe('Scheduler components', () => {
     render(<ScheduleTargetDisplay />);
 
     expect(
-      screen.getByText(
-        'This schedule does not declare a target in its current configuration.',
-      ),
+      screen.getByText('This schedule does not declare a target in its current configuration.'),
     ).toBeTruthy();
   });
 
@@ -164,5 +242,178 @@ describe('Scheduler components', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'View schedules' }));
     expect(onViewSchedules).toHaveBeenCalledOnce();
+  });
+
+  it('validates the schedule expression and time zone inline', () => {
+    const onExpressionChange = vi.fn();
+    const onTimezoneChange = vi.fn();
+
+    render(
+      <ScheduleExpressionField
+        expression="rate(5 minutes)"
+        timezone="UTC"
+        onExpressionChange={onExpressionChange}
+        onTimezoneChange={onTimezoneChange}
+      />,
+    );
+
+    expect(screen.getByText('Every 5 minutes')).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText('Schedule expression'), {
+      target: { value: 'rate(0 minutes)' },
+    });
+    expect(onExpressionChange).toHaveBeenCalledWith('rate(0 minutes)');
+
+    fireEvent.change(screen.getByLabelText('Time zone'), { target: { value: 'Not/AZone' } });
+    expect(onTimezoneChange).toHaveBeenCalledWith('Not/AZone');
+  });
+
+  it('reports expression errors as the developer types', () => {
+    render(
+      <ScheduleExpressionField
+        expression="rate("
+        timezone="UTC"
+        onExpressionChange={vi.fn()}
+        onTimezoneChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText('Schedule expression').getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('shows target fields for the ARN service and reports validation errors', () => {
+    const { rerender } = render(
+      <ScheduleTargetEditor
+        target={{
+          arn: 'arn:aws:sqs:us-east-1:000000000000:orders',
+          roleArn: 'arn:aws:iam::000000000000:role/scheduler-role',
+        }}
+        onChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText('SQS message group ID (optional)')).toBeTruthy();
+
+    rerender(
+      <ScheduleTargetEditor
+        target={{
+          arn: 'arn:aws:kinesis:us-east-1:000000000000:stream/data',
+          roleArn: 'arn:aws:iam::000000000000:role/scheduler-role',
+        }}
+        onChange={vi.fn()}
+      />,
+    );
+    expect(screen.getByLabelText('Kinesis partition key')).toBeTruthy();
+    expect(screen.getByText('Kinesis targets require a partition key')).toBeTruthy();
+
+    rerender(<ScheduleTargetEditor target={{ arn: '' }} onChange={vi.fn()} />);
+    expect(screen.getByText('Target ARN is required')).toBeTruthy();
+    expect(screen.getByText('Target role ARN is required')).toBeTruthy();
+  });
+
+  it('blocks saving a schedule until the form is valid and then submits it', async () => {
+    const onSave = vi.fn();
+
+    render(
+      <ScheduleFormDialog
+        open
+        groupName="orders"
+        pending={false}
+        onOpenChange={vi.fn()}
+        onSave={onSave}
+      />,
+    );
+
+    const saveButton = screen.getByRole('button', { name: 'Save schedule' }) as HTMLButtonElement;
+    expect(saveButton.disabled).toBe(true);
+
+    fireEvent.change(screen.getByLabelText('Schedule name'), { target: { value: 'hourly' } });
+    fireEvent.change(screen.getByLabelText('Schedule expression'), {
+      target: { value: 'rate(5 minutes)' },
+    });
+    fireEvent.change(screen.getByLabelText('Target ARN'), {
+      target: { value: 'arn:aws:sqs:us-east-1:000000000000:orders' },
+    });
+    fireEvent.change(screen.getByLabelText('Role ARN'), {
+      target: { value: 'arn:aws:iam::000000000000:role/scheduler-role' },
+    });
+
+    await waitFor(() => expect(saveButton.disabled).toBe(false));
+
+    fireEvent.click(saveButton);
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'hourly',
+        scheduleExpression: 'rate(5 minutes)',
+        scheduleExpressionTimezone: 'UTC',
+        state: 'ENABLED',
+        flexibleTimeWindow: { mode: 'OFF' },
+        target: expect.objectContaining({
+          arn: 'arn:aws:sqs:us-east-1:000000000000:orders',
+          roleArn: 'arn:aws:iam::000000000000:role/scheduler-role',
+        }),
+      }),
+    );
+  });
+
+  it('pre-fills the edit form from the schedule details and makes the name read-only', async () => {
+    detailsMock.useScheduleDetails.mockReturnValue({
+      scheduleDetails: {
+        name: 'hourly',
+        arn: 'arn:hourly',
+        groupName: 'orders',
+        state: 'DISABLED',
+        scheduleExpression: 'cron(0 12 * * ? *)',
+        scheduleExpressionTimezone: 'UTC',
+        actionAfterCompletion: 'NONE',
+        flexibleTimeWindow: { mode: 'OFF' },
+        target: { arn: 'arn:aws:sqs:us-east-1:000000000000:orders' },
+      },
+      loading: false,
+      fetching: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+
+    render(
+      <ScheduleFormDialog
+        open
+        groupName="orders"
+        scheduleName="hourly"
+        pending={false}
+        onOpenChange={vi.fn()}
+        onSave={vi.fn()}
+      />,
+    );
+
+    await waitFor(() =>
+      expect((screen.getByLabelText('Schedule name') as HTMLInputElement).value).toBe('hourly'),
+    );
+    expect((screen.getByLabelText('Schedule name') as HTMLInputElement).disabled).toBe(true);
+    expect((screen.getByLabelText('Schedule expression') as HTMLInputElement).value).toBe(
+      'cron(0 12 * * ? *)',
+    );
+    expect(screen.getByRole('button', { name: 'Save schedule' })).toBeTruthy();
+  });
+
+  it('warns about permanence and confirms schedule deletion', () => {
+    const onConfirm = vi.fn();
+    const onOpenChange = vi.fn();
+
+    render(
+      <DeleteScheduleDialog
+        scheduleName="hourly"
+        pending={false}
+        onOpenChange={onOpenChange}
+        onConfirm={onConfirm}
+      />,
+    );
+
+    expect(
+      screen.getByText('This permanently deletes the schedule. This action cannot be undone.'),
+    ).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete schedule' }));
+    expect(onConfirm).toHaveBeenCalledOnce();
   });
 });

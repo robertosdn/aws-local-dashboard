@@ -1,19 +1,30 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const hooks = vi.hoisted(() => ({
   useScheduleGroups: vi.fn(),
   useScheduleGroupDetails: vi.fn(),
   useSchedules: vi.fn(),
   useScheduleDetails: vi.fn(),
+  useSaveSchedule: vi.fn(),
+  useDeleteSchedule: vi.fn(),
+  useSetScheduleState: vi.fn(),
 }));
 
 vi.mock('@/features/eventbridge/scheduler/hooks', () => ({
   useScheduleGroups: hooks.useScheduleGroups,
   useScheduleGroupDetails: hooks.useScheduleGroupDetails,
   useSchedules: hooks.useSchedules,
+  useScheduleDetails: hooks.useScheduleDetails,
+  useSaveSchedule: hooks.useSaveSchedule,
+  useDeleteSchedule: hooks.useDeleteSchedule,
+  useSetScheduleState: hooks.useSetScheduleState,
+}));
+
+// ScheduleFormDialog imports the hook module directly rather than through the barrel.
+vi.mock('@/features/eventbridge/scheduler/hooks/useScheduleDetails', () => ({
   useScheduleDetails: hooks.useScheduleDetails,
 }));
 
@@ -34,6 +45,31 @@ describe('Scheduler page titles', () => {
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    hooks.useSaveSchedule.mockReturnValue({
+      saveSchedule: vi.fn(),
+      pending: false,
+      error: null,
+    });
+    hooks.useDeleteSchedule.mockReturnValue({
+      deleteSchedule: vi.fn(),
+      pending: false,
+      error: null,
+    });
+    hooks.useSetScheduleState.mockReturnValue({
+      setScheduleState: vi.fn(),
+      pending: false,
+      error: null,
+    });
+    hooks.useScheduleDetails.mockReturnValue({
+      scheduleDetails: undefined,
+      loading: false,
+      fetching: false,
+      error: null,
+      refetch: vi.fn(),
+    });
   });
 
   it('uses Schedule Groups as the title with an EventBridge Scheduler label', () => {

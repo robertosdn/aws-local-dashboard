@@ -22,7 +22,8 @@ const client = new SchedulerClient({
   },
 });
 
-// Deterministic samples: at least one enabled and one disabled schedule.
+// Deterministic samples: at least one enabled and one disabled schedule, one with
+// retry policy and a dead-letter queue, and one using target-specific parameters.
 // Run create-scheduler-schedule-group.mjs first so the group exists.
 const sampleSchedules = [
   {
@@ -36,6 +37,28 @@ const sampleSchedules = [
     Description: 'Sample disabled schedule that would run daily at 12:00 UTC',
     ScheduleExpression: 'cron(0 12 * * ? *)',
     State: 'DISABLED',
+  },
+  {
+    Name: 'dashboard-sample-retry',
+    Description: 'Sample schedule with a retry policy and dead-letter queue',
+    ScheduleExpression: 'rate(1 hour)',
+    State: 'ENABLED',
+    RetryPolicy: {
+      MaximumEventAgeInSeconds: 3600,
+      MaximumRetryAttempts: 5,
+    },
+    DeadLetterConfig: {
+      Arn: process.env.DLQ_ARN ?? `arn:aws:sqs:${region}:000000000000:dashboard-scheduler-dlq`,
+    },
+  },
+  {
+    Name: 'dashboard-sample-target-params',
+    Description: 'Sample FIFO SQS target that sets a message group ID',
+    ScheduleExpression: 'rate(10 minutes)',
+    State: 'ENABLED',
+    SqsParameters: {
+      MessageGroupId: 'dashboard-scheduler-group',
+    },
   },
 ];
 
@@ -51,6 +74,9 @@ function scheduleInput(sample) {
     Target: {
       Arn: targetArn,
       RoleArn: targetRoleArn,
+      RetryPolicy: sample.RetryPolicy,
+      DeadLetterConfig: sample.DeadLetterConfig,
+      SqsParameters: sample.SqsParameters,
     },
   };
 }
